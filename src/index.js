@@ -65,6 +65,7 @@ function PositionLogger() {
       y: avgEyePosition.y.toFixed(5),
       z: avgEyePosition.z.toFixed(5)
     })
+    console.log(leftEyeView.transform.orientation)
   })
 
   return null
