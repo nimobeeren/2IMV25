@@ -1,7 +1,6 @@
 import { Plane, Sky, Text } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
 import { DefaultXRControllers, useXRFrame, VRCanvas } from '@react-three/xr'
-import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 import './styles.css'
 
@@ -40,11 +39,8 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
   )
 }
 
-function PositionLogger(props) {
+function PositionLogger() {
   const { gl } = useThree()
-
-  const [time, setTime] = useState(0)
-  const [pos, setPos] = useState(null)
 
   useXRFrame(async (time, xrFrame) => {
     if (!gl.xr.isPresenting) return
@@ -52,22 +48,11 @@ function PositionLogger(props) {
     const referenceSpace = gl.xr.getReferenceSpace()
     const viewerPose = xrFrame.getViewerPose(referenceSpace)
 
-    console.log(viewerPose.views)
-
     // https://developer.mozilla.org/en-US/docs/Web/API/XRView
-
-    setTime(time)
-    // setPos(xrFrame.getViewerPose())
+    console.log(viewerPose.views)
   })
 
-  return (
-    <Plane rotation={[0, 0, 0]} scale={3} {...props}>
-      <meshPhongMaterial attach="material" color="#0000aa" />
-      <Text position={[0, 0, 0.01]} fontSize={0.15} color="#fff" anchorX="center" anchorY="middle">
-        Time: {time}
-      </Text>
-    </Plane>
-  )
+  return null
 }
 
 function App() {
@@ -77,7 +62,7 @@ function App() {
       <ambientLight />
       <pointLight position={[10, 10, 10]} />
       <DefaultXRControllers />
-      <PositionLogger position={[0, 0, -1]} />
+      <PositionLogger />
       <Floor position={[0, -5, 0]} />
       <Wall position={[0, 0, -5]} color="#00aa00" />
       <Wall position={[5, 0, 0]} rotation={[0, -Math.PI / 2, 0]} color="#aaaa00" />
