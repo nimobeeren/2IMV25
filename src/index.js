@@ -1,7 +1,7 @@
 import { Plane, Sky, Text } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
-import { DefaultXRControllers, useXRFrame, VRCanvas } from '@react-three/xr'
+import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
 import ReactDOM from 'react-dom'
+import { PositionLogger } from './components/PositionLogger'
 import './styles.css'
 
 function Floor(props) {
@@ -37,38 +37,6 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
       )}
     </Plane>
   )
-}
-
-function PositionLogger() {
-  const { gl } = useThree()
-
-  useXRFrame(async (time, xrFrame) => {
-    if (!gl.xr.isPresenting) return
-
-    const referenceSpace = gl.xr.getReferenceSpace()
-    const viewerPose = xrFrame.getViewerPose(referenceSpace)
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/XRView
-    const leftEyeView = viewerPose.views[0]
-    const rightEyeView = viewerPose.views[1]
-
-    // Get the average position of the two eyes
-    const avgEyePosition = DOMPointReadOnly.fromPoint({
-      x: (leftEyeView.transform.position.x + rightEyeView.transform.position.x) / 2,
-      y: (leftEyeView.transform.position.y + rightEyeView.transform.position.y) / 2,
-      z: (leftEyeView.transform.position.z + rightEyeView.transform.position.z) / 2,
-      w: (leftEyeView.transform.position.w + rightEyeView.transform.position.w) / 2
-    })
-
-    console.log({
-      x: avgEyePosition.x.toFixed(5),
-      y: avgEyePosition.y.toFixed(5),
-      z: avgEyePosition.z.toFixed(5)
-    })
-    console.log(leftEyeView.transform.orientation)
-  })
-
-  return null
 }
 
 function App() {
