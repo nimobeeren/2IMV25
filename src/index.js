@@ -49,7 +49,22 @@ function PositionLogger() {
     const viewerPose = xrFrame.getViewerPose(referenceSpace)
 
     // https://developer.mozilla.org/en-US/docs/Web/API/XRView
-    console.log(viewerPose.views)
+    const leftEyeView = viewerPose.views[0]
+    const rightEyeView = viewerPose.views[1]
+
+    // Get the average position of the two eyes
+    const avgEyePosition = DOMPointReadOnly.fromPoint({
+      x: (leftEyeView.transform.position.x + rightEyeView.transform.position.x) / 2,
+      y: (leftEyeView.transform.position.y + rightEyeView.transform.position.y) / 2,
+      z: (leftEyeView.transform.position.z + rightEyeView.transform.position.z) / 2,
+      w: (leftEyeView.transform.position.w + rightEyeView.transform.position.w) / 2
+    })
+
+    console.log({
+      x: avgEyePosition.x.toFixed(5),
+      y: avgEyePosition.y.toFixed(5),
+      z: avgEyePosition.z.toFixed(5)
+    })
   })
 
   return null
