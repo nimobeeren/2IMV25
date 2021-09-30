@@ -2,7 +2,7 @@ import { useThree } from '@react-three/fiber'
 import { useXRFrame } from '@react-three/xr'
 import { Euler, Quaternion } from 'three'
 
-export function PositionLogger() {
+export function PositionLogger({ onUpdate = undefined }) {
   const { gl } = useThree()
 
   useXRFrame(async (time, xrFrame) => {
@@ -23,11 +23,11 @@ export function PositionLogger() {
       w: (leftEyeView.transform.position.w + rightEyeView.transform.position.w) / 2
     })
 
-    console.log('position', {
-      x: avgEyePosition.x.toFixed(2),
-      y: avgEyePosition.y.toFixed(2),
-      z: avgEyePosition.z.toFixed(2)
-    })
+    // console.log('position', {
+    //   x: avgEyePosition.x.toFixed(2),
+    //   y: avgEyePosition.y.toFixed(2),
+    //   z: avgEyePosition.z.toFixed(2)
+    // })
 
     // Get the Euler angles, which represent a rotation over the x, y and z axes
     const euler = new Euler().setFromQuaternion(
@@ -39,11 +39,18 @@ export function PositionLogger() {
       )
     )
 
-    console.log('orientation', {
-      x: euler.x.toFixed(2),
-      y: euler.y.toFixed(2),
-      z: euler.z.toFixed(2)
-    })
+    // console.log('orientation', {
+    //   x: euler.x.toFixed(2),
+    //   y: euler.y.toFixed(2),
+    //   z: euler.z.toFixed(2)
+    // })
+
+    if (onUpdate) {
+      onUpdate({
+        position: [avgEyePosition.x, avgEyePosition.y, avgEyePosition.z],
+        orientation: [euler.x, euler.y, euler.z]
+      })
+    }
   })
 
   return null
