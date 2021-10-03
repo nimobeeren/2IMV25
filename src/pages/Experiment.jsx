@@ -7,10 +7,44 @@ import '../index.css'
 
 const characterSet1 = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
 const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
+const developMode = true
+const numberOfTargets = 6
+const roomSize = 1
+const letterSize = roomSize / numberOfTargets
 
-function Wall({ color, numTargets = [6, 6], ...restProps }) {
+function Door() {
 	return (
-		<Plane scale={[4, 4, 4]} {...restProps}>
+		<Plane
+			args={[letterSize * 1.75, roomSize / 2]}
+			key={`door`}
+			position={[letterSize, -roomSize / 4, 0.011]}
+		>
+			<meshPhongMaterial attach='material' color={'#8B4513'} />
+		</Plane>
+	)
+}
+
+function Window(side) {
+	const direction = side === 'left' ? -1 : 1
+	return (
+		<Plane
+			args={[letterSize, letterSize * 2]}
+			key={`window`}
+			position={[letterSize * 1.5 * direction, -letterSize, 0.011]}
+		>
+			<meshPhongMaterial attach='material' color={'#87CEEB'} />
+		</Plane>
+	)
+}
+
+function Wall({
+	color,
+	numTargets = [numberOfTargets, numberOfTargets],
+	side = 'regular',
+	...restProps
+}) {
+	return (
+		<Plane scale={10} {...restProps}>
 			<meshPhongMaterial attach='material' color={color} />
 			{Array.from(Array(numTargets[0]).keys()).flatMap(i =>
 				Array.from(Array(numTargets[1]).keys()).map(j => {
@@ -21,7 +55,7 @@ function Wall({ color, numTargets = [6, 6], ...restProps }) {
 					return (
 						<Text
 							key={`target-${i}-${j}`}
-							position={[x, y, 0.01]}
+							position={[x, y, 0.0001]}
 							fontSize={0.15}
 							color='#000000'
 							anchorX='center'
@@ -32,14 +66,8 @@ function Wall({ color, numTargets = [6, 6], ...restProps }) {
 					)
 				})
 			)}
-		</Plane>
-	)
-}
-
-function RoomObject({ color, ...restProps }) {
-	return (
-		<Plane scale={10} {...restProps}>
-			<meshPhongMaterial attach='material' color={color} />
+			,{side === 'back' && Door()}
+			{(side === 'right' || side === 'left') && Window(side)}
 		</Plane>
 	)
 }
@@ -53,55 +81,45 @@ function App() {
 				<pointLight position={[10, 10, 10]} />
 				<DefaultXRControllers />
 				<PositionLogger />
-				{/* Window left */}
-				<RoomObject
-					args={[0.1, 0.125]}
-					position={[-1.999, 2, -0.75]}
-					rotation={[0, Math.PI / 2, 0]}
-					color='#00A9F7'
-				/>
-				{/* Window right */}
-				<RoomObject
-					args={[0.1, 0.125]}
-					position={[1.999, 2, -0.75]}
-					rotation={[0, -Math.PI / 2, 0]}
-					color='#00A9F7'
-				/>
-				{/* Door */}
-				<RoomObject
-					args={[0.125, 0.3]}
-					position={[0.75, 1.5, -1.999]}
-					rotation={[0, 0, 0]}
-					color='#a5774d'
-				/>
 				{/* Top wall */}
 				<Wall
-					position={[0, 4, 0]}
+					position={developMode ? [0, 5, -5] : [0, 5, 0]}
 					rotation={[Math.PI / 2, 0, 0]}
 					color='#ececec'
 				/>
 				{/* Bottom wall */}
 				<Wall
-					position={[0, 0, 0]}
+					position={developMode ? [0, -5, -5] : [0, -5, 0]}
 					rotation={[-Math.PI / 2, 0, 0]}
-					color='#ececec'
+					color='#00ff00'
 				/>
 				{/* Back wall */}
-				<Wall position={[0, 2, -2]} rotation={[0, 0, 0]} color='#ececec' />
+				<Wall
+					position={developMode ? [0, 0, -5] : [0, 0, -5]}
+					rotation={[0, 0, 0]}
+					color='#ececec'
+					side='back'
+				/>
 				{/* Right wall */}
 				<Wall
-					position={[2, 2, 0]}
+					position={developMode ? [5, 0, -5] : [5, 0, 0]}
 					rotation={[0, -Math.PI / 2, 0]}
 					color='#ececec'
+					side='right'
 				/>
 				{/* Left wall */}
 				<Wall
-					position={[-2, 2, 0]}
+					position={developMode ? [-5, 0, -5] : [-5, 0, 0]}
 					rotation={[0, Math.PI / 2, 0]}
 					color='#ececec'
+					side='left'
 				/>
 				{/* Front wall */}
-				<Wall position={[0, 2, 2]} rotation={[0, Math.PI, 0]} color='#ececec' />
+				<Wall
+					position={developMode ? [0, 0, 0] : [0, 0, 0]}
+					rotation={[0, Math.PI, 0]}
+					color='#ececec'
+				/>
 			</VRCanvas>
 		</>
 	)
