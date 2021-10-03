@@ -11,7 +11,6 @@ export default function LoadingOrError({ error }) {
 			<div className='min-h-screen sm:flex sm:flex-row mx-0 justify-center z-10'>
 				<div className='flex-col flex  self-center p-10 sm:max-w-5xl xl:max-w-2xl  z-10'>
 					<div className='self-start hidden lg:flex flex-col text-white'>
-						<img src className='mb-3' />
 						<h1 className='mb-3 text-xl'>{error ? error : 'loading...'}</h1>
 					</div>
 				</div>
