@@ -7,7 +7,7 @@ import '../index.css'
 
 const characterSet1 = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
 const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
-const developMode = true
+const developMode = false
 const numberOfTargets = 6
 const roomSize = 1
 const letterSize = roomSize / numberOfTargets
@@ -116,7 +116,7 @@ function App() {
 				/>
 				{/* Front wall */}
 				<Wall
-					position={developMode ? [0, 0, 0] : [0, 0, 0]}
+					position={developMode ? [0, 0, 5] : [0, 0, 5]}
 					rotation={[0, Math.PI, 0]}
 					color='#ececec'
 				/>
