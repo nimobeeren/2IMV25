@@ -5,12 +5,12 @@ import Head from '../components/Head'
 import { PositionLogger } from '../components/vr/PositionLogger'
 import '../index.css'
 
-const characterSet1 = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
-const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
-const developMode = false
-const numberOfTargets = 6
-const roomSize = 1
-const letterSize = roomSize / numberOfTargets
+const characterSet1 = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z'];
+const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T'];
+const developMode = true;
+const numberOfTargets = 6;
+const roomSize = 1;
+const letterSize = roomSize / numberOfTargets;
 
 function Door() {
 	return (
@@ -95,7 +95,7 @@ function App() {
 				/>
 				{/* Back wall */}
 				<Wall
-					position={developMode ? [0, 0, -5] : [0, 0, -5]}
+					position={developMode ? [0, 0, -10] : [0, 0, -5]}
 					rotation={[0, 0, 0]}
 					color='#ececec'
 					side='back'
