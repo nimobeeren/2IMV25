@@ -13,10 +13,10 @@ const roomSize = 1;
 const letterSize = roomSize / numberOfTargets;
 const radiusInnerFloor = 0.25;
 const radiusOuterFloor = 0.40;
-const outerPositionsFloor = [1, 3, 4, 7, 9, 10]
+const outerPositionsFloor = [3, 8, 9, 14, 19, 20]
 const radiusInnerCeiling = 0.25;
 const radiusOuterCeiling = 0.40;
-const outerPositionsCeiling = [1, 2, 3, 4, 5, 7, 8, 10, 11]
+const outerPositionsCeiling = [1, 2, 3, 7, 8, 12, 13, 17, 18]
 
 function Door() {
   return (
@@ -80,7 +80,7 @@ function Wall({
 
 function Floor({
   color,
-  numTargets = [11, 11],
+  numTargets = [11, 22],
   side = 'regular',
   ...restProps
 }) {
@@ -107,12 +107,12 @@ function Floor({
           </Text>
         )
       })}
-      {Array.from(Array(numTargets[0]).keys()).map(i => {
+      {Array.from(Array(numTargets[1]).keys()).map(i => {
         const letter = characterSet1[Math.floor(Math.random() * characterSet1.length)]
-        const a = 2 * Math.PI / numTargets[0]
+        const a = 2 * Math.PI / numTargets[1]
         const x = radiusOuterFloor * Math.cos(i * a)
         const y = radiusOuterFloor * Math.sin(i * a)
-        const rotationFloor = i * (2 * Math.PI / numTargets[0]) - (Math.PI / 2);
+        const rotationFloor = i * (2 * Math.PI / numTargets[1]) - (Math.PI / 2);
 
         if (outerPositionsFloor.includes(i)) {
           return (
@@ -136,7 +136,7 @@ function Floor({
 
 function Ceiling({
   color,
-  numTargets = [12, 11],
+  numTargets = [12, 20],
   side = 'regular',
   ...restProps
 }) {
@@ -163,12 +163,12 @@ function Ceiling({
           </Text>
         )
       })}
-      {Array.from(Array(numTargets[0]).keys()).map(i => {
+      {Array.from(Array(numTargets[1]).keys()).map(i => {
         const letter = characterSet1[Math.floor(Math.random() * characterSet1.length)]
-        const a = 2 * Math.PI / numTargets[0]
+        const a = 2 * Math.PI / numTargets[1]
         const x = radiusOuterCeiling * Math.cos(i * a)
         const y = radiusOuterCeiling * Math.sin(i * a)
-        const rotationCeiling = i * (2 * Math.PI / numTargets[0]) + (Math.PI / 2);
+        const rotationCeiling = i * (2 * Math.PI / numTargets[1]) + (Math.PI / 2);
 
         if (outerPositionsCeiling.includes(i)) {
           return (
