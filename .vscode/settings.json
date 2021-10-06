@@ -10,7 +10,7 @@
 	"editor.foldingImportsByDefault": true,
 	"editor.formatOnSave": true,
 	"editor.tabSize": 2,
-	"eslint.packageManager": "yarn",
+	"eslint.packageManager": "npm",
 	"files.exclude": {
 		"**/.eslintcache": true,
 		"**/.gitignore": true,
