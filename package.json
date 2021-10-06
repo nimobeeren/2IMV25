@@ -8,7 +8,16 @@
 		"commit": "cz",
 		"dev": "vite --open",
 		"prepare": "husky install",
-		"serve": "vite preview"
+		"serve": "vite preview",
+		"serve:test": "start-server-and-test 'npm serve' http://localhost:5000",
+		"test": "npm serve:test 'cypress open'",
+		"test:headless": "npm serve:test 'cypress run'",
+		"format": "prettier -uw --ignore-path .gitignore .",
+		"run-tsc": "tsc",
+		"run-eslint": "eslint --cache --fix --ignore-path .gitignore --ext .js,.ts,.tsx",
+		"run-stylelint": "stylelint --cache --fix --ignore-path .gitignore '**/*.css'",
+		"lint": "npm-run-all --parallel run-tsc run-eslint",
+		"validate": "npm lint && npm build --mode test && npm test:headless"
 	},
 	"dependencies": {
 		"react": "17.0.2",
@@ -44,6 +53,7 @@
 		"eslint-plugin-unicorn": "36.0.0",
 		"husky": "7.0.2",
 		"lint-staged": "11.1.2",
+		"npm-run-all": "^4.1.5",
 		"postcss": "8.3.8",
 		"prettier": "2.4.1",
 		"rollup-plugin-istanbul": "3.0.0",
