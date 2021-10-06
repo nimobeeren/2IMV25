@@ -1,6 +1,5 @@
 import { Plane, Sky, Text } from '@react-three/drei'
 import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
-import ReactDOM from 'react-dom'
 import Head from '../components/Head'
 import { PositionLogger } from '../components/vr/PositionLogger'
 import '../index.css'
@@ -42,7 +41,7 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
 	)
 }
 
-function App() {
+function Experiment() {
 	return (
 		<>
 			<Head title='Quantifying Immersion Experiment' />
@@ -75,4 +74,4 @@ function App() {
 	)
 }
 
-ReactDOM.render(<App />, document.getElementById('root'))
+export default Experiment
