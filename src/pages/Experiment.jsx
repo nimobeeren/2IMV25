@@ -1,7 +1,6 @@
 import { Plane, Sky, Text } from '@react-three/drei'
 import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
-import { useState } from 'react'
-import ReactDOM from 'react-dom'
+import React, { useCallback, useState } from 'react'
 import { PositionLogger } from '../components/vr/PositionLogger'
 
 function Floor(props) {
@@ -41,8 +40,7 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
 	)
 }
 
-function VR({ onUpdate = undefined }) {
-	console.log('VR re-render')
+const VR = React.memo(function VR({ onUpdate = undefined }) {
 	return (
 		<VRCanvas>
 			<Sky sunPosition={[0, 1, 0]} />
@@ -70,17 +68,31 @@ function VR({ onUpdate = undefined }) {
 			/>
 		</VRCanvas>
 	)
-}
+})
 
-function App() {
+function Experiment() {
 	const [log, setLog] = useState({
 		position: [],
 		orientation: []
 	})
 
+	const handleUpdate = useCallback(({ position, orientation }) => {
+		setLog(prevLog => {
+			// only log the first 1000 frames as a test
+			if (prevLog.position.length < 1000) {
+				return {
+					position: [...prevLog.position, position],
+					orientation: [...prevLog.orientation, orientation]
+				}
+			} else {
+				return prevLog
+			}
+		})
+	}, [])
+
 	return (
-		<>
-			<div>
+		<div style={{ position: 'relative', width: '100%', height: '100%' }}>
+			<div style={{ position: 'absolute', left: 30, top: 30, zIndex: 1 }}>
 				<a
 					href={`data:application/json;charset=utf-8,${JSON.stringify(log)}`}
 					download='log.json'
@@ -88,20 +100,9 @@ function App() {
 					Download log
 				</a>
 			</div>
-			<VR
-				onUpdate={({ position, orientation }) => {
-					// only log the first 1000 frames as a test
-					if (log.position.length < 1000) {
-						// TODO: setting state every frame causes the whole VR canvas to re-render, which tanks performance
-						setLog(prevLog => ({
-							position: [...prevLog.position, position],
-							orientation: [...prevLog.orientation, orientation]
-						}))
-					}
-				}}
-			/>
-		</>
+			<VR onUpdate={handleUpdate} />
+		</div>
 	)
 }
 
-ReactDOM.render(<App />, document.getElementById('root'))
+export default Experiment

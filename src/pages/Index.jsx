@@ -1,7 +1,6 @@
 import Head from '../components/Head'
 
 export default function HomePage() {
-	console.log('test');
 	return (
 		<>
 			<Head title='Quantifying Immersion Experiment' />
