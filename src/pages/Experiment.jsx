@@ -76,25 +76,40 @@ function Experiment() {
 		orientation: []
 	})
 
-	const handleUpdate = useCallback(({ position, orientation }) => {
-		setLog(prevLog => {
-			// only log the first 1000 frames as a test
-			if (prevLog.position.length < 1000) {
-				return {
-					position: [...prevLog.position, position],
-					orientation: [...prevLog.orientation, orientation]
+	const [isLogging, setIsLogging] = useState(false)
+
+	const handleUpdate = useCallback(
+		({ position, orientation }) => {
+			setLog(prevLog => {
+				if (isLogging) {
+					return {
+						position: [...prevLog.position, position],
+						orientation: [...prevLog.orientation, orientation]
+					}
+				} else {
+					return prevLog
 				}
-			} else {
-				return prevLog
-			}
-		})
-	}, [])
+			})
+		},
+		// FIXME: when isLogging is changed, handleUpdate is changed, which causes
+		// a re-render of the VR canvas, which causes a crash (seems to happen only
+		// when stopping logging)
+		[isLogging]
+	)
 
 	return (
 		<>
-			<div className='fixed bottom-4 right-4 z-10'>
+			<div className='fixed bottom-4 right-4 z-10 flex gap-2 items-center'>
+				<button
+					className='flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
+					onClick={() => {
+						setIsLogging(prev => !prev)
+					}}
+				>
+					{isLogging ? 'Stop logging' : 'Start logging'}
+				</button>
 				<a
-					className='w-full flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
+					className='flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
 					href={`data:application/json;charset=utf-8,${JSON.stringify(log)}`}
 					download='log.json'
 				>
