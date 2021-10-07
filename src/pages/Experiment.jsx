@@ -1,8 +1,8 @@
 import { Plane, Sky, Text } from '@react-three/drei'
 import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
-import Head from '../components/Head'
+import { useState } from 'react'
+import ReactDOM from 'react-dom'
 import { PositionLogger } from '../components/vr/PositionLogger'
-import '../index.css'
 
 function Floor(props) {
 	return (
@@ -41,37 +41,67 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
 	)
 }
 
-function Experiment() {
+function VR({ onUpdate = undefined }) {
+	console.log('VR re-render')
+	return (
+		<VRCanvas>
+			<Sky sunPosition={[0, 1, 0]} />
+			<ambientLight />
+			<pointLight position={[10, 10, 10]} />
+			<DefaultXRControllers />
+			<PositionLogger onUpdate={onUpdate} />
+			<Floor position={[0, -5, 0]} />
+			<Wall position={[0, 0, -5]} color='#00aa00' />
+			<Wall
+				position={[5, 0, 0]}
+				rotation={[0, -Math.PI / 2, 0]}
+				color='#aaaa00'
+			/>
+			<Wall
+				position={[-5, 0, 0]}
+				rotation={[0, Math.PI / 2, 0]}
+				color='#aa0000'
+			/>
+			<Wall
+				position={[0, 0, 5]}
+				rotation={[0, Math.PI, 0]}
+				color='#0000aa'
+				numTargets={[0, 0]}
+			/>
+		</VRCanvas>
+	)
+}
+
+function App() {
+	const [log, setLog] = useState({
+		position: [],
+		orientation: []
+	})
+
 	return (
 		<>
-			<Head title='Quantifying Immersion Experiment' />
-			<VRCanvas>
-				<Sky sunPosition={[0, 1, 0]} />
-				<ambientLight />
-				<pointLight position={[10, 10, 10]} />
-				<DefaultXRControllers />
-				<PositionLogger />
-				<Floor position={[0, -5, 0]} />
-				<Wall position={[0, 0, -5]} color='#00aa00' />
-				<Wall
-					position={[5, 0, 0]}
-					rotation={[0, -Math.PI / 2, 0]}
-					color='#aaaa00'
-				/>
-				<Wall
-					position={[-5, 0, 0]}
-					rotation={[0, Math.PI / 2, 0]}
-					color='#aa0000'
-				/>
-				<Wall
-					position={[0, 0, 5]}
-					rotation={[0, Math.PI, 0]}
-					color='#0000aa'
-					numTargets={[0, 0]}
-				/>
-			</VRCanvas>
+			<div>
+				<a
+					href={`data:application/json;charset=utf-8,${JSON.stringify(log)}`}
+					download='log.json'
+				>
+					Download log
+				</a>
+			</div>
+			<VR
+				onUpdate={({ position, orientation }) => {
+					// only log the first 1000 frames as a test
+					if (log.position.length < 1000) {
+						// TODO: setting state every frame causes the whole VR canvas to re-render, which tanks performance
+						setLog(prevLog => ({
+							position: [...prevLog.position, position],
+							orientation: [...prevLog.orientation, orientation]
+						}))
+					}
+				}}
+			/>
 		</>
 	)
 }
 
-export default Experiment
+ReactDOM.render(<App />, document.getElementById('root'))
