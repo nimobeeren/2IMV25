@@ -91,9 +91,10 @@ function Experiment() {
 	}, [])
 
 	return (
-		<div style={{ position: 'relative', width: '100%', height: '100%' }}>
-			<div style={{ position: 'absolute', left: 30, top: 30, zIndex: 1 }}>
+		<>
+			<div className='fixed bottom-4 right-4 z-10'>
 				<a
+					className='w-full flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
 					href={`data:application/json;charset=utf-8,${JSON.stringify(log)}`}
 					download='log.json'
 				>
@@ -101,7 +102,7 @@ function Experiment() {
 				</a>
 			</div>
 			<VR onUpdate={handleUpdate} />
-		</div>
+		</>
 	)
 }
 
