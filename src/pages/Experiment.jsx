@@ -1,6 +1,6 @@
 import { Plane, Sky, Text } from '@react-three/drei'
 import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
-import React, { useCallback, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { PositionLogger } from '../components/vr/PositionLogger'
 
 function Floor(props) {
@@ -40,7 +40,7 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
 	)
 }
 
-const VR = React.memo(function VR({ onUpdate = undefined }) {
+const VR = React.memo(function VR({ onUpdate }) {
 	return (
 		<VRCanvas>
 			<Sky sunPosition={[0, 1, 0]} />
@@ -71,31 +71,32 @@ const VR = React.memo(function VR({ onUpdate = undefined }) {
 })
 
 function Experiment() {
-	const [log, setLog] = useState({
+	const [headLog, setHeadLog] = useState({
 		position: [],
 		orientation: []
 	})
-
+	const [currentHead, setCurrentHead] = useState(null)
 	const [isLogging, setIsLogging] = useState(false)
 
-	const handleUpdate = useCallback(
-		({ position, orientation }) => {
-			setLog(prevLog => {
-				if (isLogging) {
+	// Every time currentHead changes, append it to the log.
+	// It seems easier to set the state directly in the onUpdate callback instead,
+	// of in a useEffect, but that caused problems with re-rendering the VR
+	// component when isLogging was changed (because the onUpdate callback depends
+	// on the value of isLogging).
+	useEffect(() => {
+		if (isLogging) {
+			setHeadLog(prevLog => {
+				if (currentHead) {
 					return {
-						position: [...prevLog.position, position],
-						orientation: [...prevLog.orientation, orientation]
+						position: [...prevLog.position, currentHead.position],
+						orientation: [...prevLog.orientation, currentHead.orientation]
 					}
 				} else {
 					return prevLog
 				}
 			})
-		},
-		// FIXME: when isLogging is changed, handleUpdate is changed, which causes
-		// a re-render of the VR canvas, which causes a crash (seems to happen only
-		// when stopping logging)
-		[isLogging]
-	)
+		}
+	}, [isLogging, currentHead])
 
 	return (
 		<>
@@ -110,13 +111,17 @@ function Experiment() {
 				</button>
 				<a
 					className='flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
-					href={`data:application/json;charset=utf-8,${JSON.stringify(log)}`}
+					href={`data:application/json;charset=utf-8,${JSON.stringify(
+						headLog
+					)}`}
 					download='log.json'
 				>
 					Download log
 				</a>
 			</div>
-			<VR onUpdate={handleUpdate} />
+			{/* Because the identity of the setState function is stable, the VR
+			component doesn't re-render when this one does. */}
+			<VR onUpdate={setCurrentHead} />
 		</>
 	)
 }

@@ -2,9 +2,13 @@ import { useThree } from '@react-three/fiber'
 import { useXRFrame } from '@react-three/xr'
 import { Euler, Quaternion } from 'three'
 
-export function PositionLogger({ onUpdate = undefined }) {
+export function PositionLogger({ onUpdate }) {
 	const { gl } = useThree()
 
+	// NOTE: I sometimes ran into an error when exiting VR presenting mode, but
+	// couldn't reproduce it. It seemed to be caused by this line:
+	// https://github.com/pmndrs/react-xr/blob/4e914c17f2a425429bc02f53ac50c607a6d1fdc0/src/XR.tsx#L264
+	// and could be fixed by changing the ! to a ?
 	useXRFrame(async (time, xrFrame) => {
 		if (!gl.xr.isPresenting) return
 
