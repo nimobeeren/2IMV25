@@ -23,15 +23,6 @@ export default function HomePage() {
 									This is a web-based virtual reality experiment, where we
 									compare our results with Pausch, et al. (1997).
 								</p>
-								<p className='pr-3'>
-									<a
-										href='https://github.com/nimobeeren/2IMV25/'
-										target='_blank'
-										rel='nofollow'
-									>
-										Visit our Github
-									</a>
-								</p>
 							</div>
 						</div>
 					</div>
@@ -46,7 +37,7 @@ export default function HomePage() {
 							<div className='space-y-5'>
 								<div className='space-y-5'>
 									<a
-										href='#'
+										href='https://github.com/nimobeeren/2IMV25/'
 										className='w-full flex justify-center border-4 border-gray-800 text-gray-800 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
 									>
 										More info
@@ -58,18 +49,6 @@ export default function HomePage() {
 										Start experiment
 									</a>
 								</div>
-							</div>
-							<div className='pt-5 text-center text-gray-400 text-xs'>
-								<span>
-									Copyright © 2021-2022
-									<a
-										href='https://codepen.io/uidesignhub'
-										rel
-										target='_blank'
-										title='Ajimon'
-										className='text-green hover:text-green-500 '
-									></a>
-								</span>
 							</div>
 						</div>
 					</div>
