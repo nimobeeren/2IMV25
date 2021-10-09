@@ -1,6 +1,6 @@
 import { Plane, Sky, Text } from '@react-three/drei'
 import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { PositionLogger } from '../components/vr/PositionLogger'
 
 function Floor(props) {
@@ -40,14 +40,14 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
 	)
 }
 
-const VR = React.memo(function VR({ onUpdate }) {
+const VR = React.memo(function VR({ logFile }) {
 	return (
 		<VRCanvas>
 			<Sky sunPosition={[0, 1, 0]} />
 			<ambientLight />
 			<pointLight position={[10, 10, 10]} />
 			<DefaultXRControllers />
-			<PositionLogger onUpdate={onUpdate} />
+			<PositionLogger logFile={logFile} />
 			<Floor position={[0, -5, 0]} />
 			<Wall position={[0, 0, -5]} color='#00aa00' />
 			<Wall
@@ -71,45 +71,7 @@ const VR = React.memo(function VR({ onUpdate }) {
 })
 
 function Experiment() {
-	const [headLog, setHeadLog] = useState({
-		position: [],
-		orientation: []
-	})
-	const [currentHead, setCurrentHead] = useState(null)
-	const [isLogging, setIsLogging] = useState(false)
 	const [logFile, setLogFile] = useState(null)
-
-	// Every time currentHead changes, append it to the log.
-	// It seems easier to set the state directly in the onUpdate callback instead,
-	// of in a useEffect, but that caused problems with re-rendering the VR
-	// component when isLogging was changed (because the onUpdate callback depends
-	// on the value of isLogging).
-	useEffect(() => {
-		if (isLogging) {
-			setHeadLog(prevLog => {
-				if (currentHead) {
-					return {
-						position: [...prevLog.position, currentHead.position],
-						orientation: [...prevLog.orientation, currentHead.orientation]
-					}
-				} else {
-					return prevLog
-				}
-			})
-		}
-	}, [isLogging, currentHead])
-
-	// When logging is stopped, and a log file exists, write the log to the file
-	useEffect(() => {
-		if (!isLogging && logFile) {
-			const writeLog = async () => {
-				const stream = await logFile.createWritable()
-				stream.write(JSON.stringify(headLog))
-				stream.close()
-			}
-			writeLog()
-		}
-	}, [isLogging, logFile])
 
 	return (
 		<>
@@ -117,36 +79,32 @@ function Experiment() {
 				<button
 					className='flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
 					onClick={async () => {
-						const fileHandle = await showSaveFilePicker({
-							suggestedName: 'log.json',
-							startIn: 'desktop',
-							types: [
-								{
-									description: 'JSON log file',
-									accept: {
-										'application/json': ['.json']
+						try {
+							const fileHandle = await showSaveFilePicker({
+								suggestedName: 'log.json',
+								startIn: 'desktop',
+								types: [
+									{
+										description: 'JSON log file',
+										accept: {
+											'application/json': ['.json']
+										}
 									}
-								}
-							]
-						})
-
-						setLogFile(fileHandle)
+								]
+							})
+							setLogFile(fileHandle)
+							console.info('Set log location')
+						} catch (err) {
+							console.error(
+								'Failed to set log location with error\n' + err.toString()
+							)
+						}
 					}}
 				>
-					Create log
-				</button>
-				<button
-					className='flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
-					onClick={() => {
-						setIsLogging(prev => !prev)
-					}}
-				>
-					{isLogging ? 'Stop' : 'Start'}
+					Set log location
 				</button>
 			</div>
-			{/* Because the identity of the setState function is stable, the <VR />
-			component doesn't re-render when <Experiment /> does. */}
-			<VR onUpdate={setCurrentHead} />
+			<VR logFile={logFile} />
 		</>
 	)
 }

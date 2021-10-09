@@ -1,14 +1,44 @@
 import { useThree } from '@react-three/fiber'
-import { useXRFrame } from '@react-three/xr'
+import { useEffect, useState } from 'react'
 import { Euler, Quaternion } from 'three'
+import { useXRFrame } from '../../hooks/useXRFrame'
 
-export function PositionLogger({ onUpdate }) {
+export function PositionLogger({ logFile }) {
+	const [headLog, setHeadLog] = useState({
+		position: [],
+		orientation: []
+	})
+
 	const { gl } = useThree()
 
-	// NOTE: I sometimes ran into an error when exiting VR presenting mode, but
-	// couldn't reproduce it. It seemed to be caused by this line:
-	// https://github.com/pmndrs/react-xr/blob/4e914c17f2a425429bc02f53ac50c607a6d1fdc0/src/XR.tsx#L264
-	// and could be fixed by changing the ! to a ?
+	// When leaving presenting mode, and if a log file exists,
+	// write the log to the file
+	useEffect(() => {
+		if (logFile && !gl.xr.isPresenting && headLog.position.length > 0) {
+			const writeLog = async () => {
+				try {
+					const stream = await logFile.createWritable()
+					stream.write(JSON.stringify(headLog))
+					stream.close()
+					console.info('Wrote log to file')
+				} catch (err) {
+					console.error(
+						'Failed to write log to file with error:\n' + err.toString()
+					)
+				}
+			}
+			writeLog()
+		}
+	}, [logFile, gl.xr.isPresenting, headLog])
+
+	// Warn when starting presenting mode without a log file
+	useEffect(() => {
+		if (!logFile && gl.xr.isPresenting) {
+			console.warn('Starting presenting mode without a log file!')
+		}
+	}, [logFile, gl.xr.isPresenting])
+
+	// Log the head position/orientation on every frame
 	useXRFrame(async (time, xrFrame) => {
 		if (!gl.xr.isPresenting) return
 
@@ -27,7 +57,8 @@ export function PositionLogger({ onUpdate }) {
 			w: (leftEye.position.w + rightEye.position.w) / 2
 		})
 
-		// Get the Euler angles, which represent a rotation over the x, y and z axes
+		// Convert orientation from quaternion to Euler angles, which represent a
+		// rotation over the x, y and z axes
 		const euler = new Euler().setFromQuaternion(
 			new Quaternion(
 				leftEye.orientation.x,
@@ -37,12 +68,15 @@ export function PositionLogger({ onUpdate }) {
 			)
 		)
 
-		if (onUpdate) {
-			onUpdate({
-				position: [avgEyePosition.x, avgEyePosition.y, avgEyePosition.z],
-				orientation: [euler.x, euler.y, euler.z]
-			})
+		// Append the current head position/orientation to the log
+		const newHead = {
+			position: [avgEyePosition.x, avgEyePosition.y, avgEyePosition.z],
+			orientation: [euler.x, euler.y, euler.z]
 		}
+		setHeadLog(prevLog => ({
+			position: [...prevLog.position, newHead.position],
+			orientation: [...prevLog.orientation, newHead.orientation]
+		}))
 	})
 
 	return null
