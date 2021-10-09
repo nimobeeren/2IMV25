@@ -40,10 +40,9 @@
 		"vite-tsconfig-paths": "3.3.14"
 	},
 	"browserslist": {
-		"production": "Edge >= 18, Firefox >= 60, Chrome >= 61, Safari >= 11, Opera >= 48",
+		"production": "Chrome >= 86, Opera >= 72",
 		"development": [
-			"last 1 chrome version",
-			"last 1 firefox version"
+			"last 1 chrome version"
 		]
 	}
 }
