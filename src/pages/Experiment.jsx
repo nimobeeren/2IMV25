@@ -77,6 +77,7 @@ function Experiment() {
 	})
 	const [currentHead, setCurrentHead] = useState(null)
 	const [isLogging, setIsLogging] = useState(false)
+	const [logFile, setLogFile] = useState(null)
 
 	// Every time currentHead changes, append it to the log.
 	// It seems easier to set the state directly in the onUpdate callback instead,
@@ -98,29 +99,53 @@ function Experiment() {
 		}
 	}, [isLogging, currentHead])
 
+	// When logging is stopped, and a log file exists, write the log to the file
+	useEffect(() => {
+		if (!isLogging && logFile) {
+			const writeLog = async () => {
+				const stream = await logFile.createWritable()
+				stream.write(JSON.stringify(headLog))
+				stream.close()
+			}
+			writeLog()
+		}
+	}, [isLogging, logFile])
+
 	return (
 		<>
 			<div className='fixed bottom-4 right-4 z-10 flex gap-2 items-center'>
+				<button
+					className='flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
+					onClick={async () => {
+						const fileHandle = await showSaveFilePicker({
+							suggestedName: 'log.json',
+							startIn: 'desktop',
+							types: [
+								{
+									description: 'JSON log file',
+									accept: {
+										'application/json': ['.json']
+									}
+								}
+							]
+						})
+
+						setLogFile(fileHandle)
+					}}
+				>
+					Create log
+				</button>
 				<button
 					className='flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
 					onClick={() => {
 						setIsLogging(prev => !prev)
 					}}
 				>
-					{isLogging ? 'Stop logging' : 'Start logging'}
+					{isLogging ? 'Stop' : 'Start'}
 				</button>
-				<a
-					className='flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
-					href={`data:application/json;charset=utf-8,${JSON.stringify(
-						headLog
-					)}`}
-					download='log.json'
-				>
-					Download log
-				</a>
 			</div>
-			{/* Because the identity of the setState function is stable, the VR
-			component doesn't re-render when this one does. */}
+			{/* Because the identity of the setState function is stable, the <VR />
+			component doesn't re-render when <Experiment /> does. */}
 			<VR onUpdate={setCurrentHead} />
 		</>
 	)
