@@ -1,13 +1,13 @@
-import { Html, Plane, Sky, Text, Circle, Sphere } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { Plane, Sky, Sphere, Text } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
 import { DefaultXRControllers, useXRFrame, VRCanvas } from '@react-three/xr'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import ReactDOM from 'react-dom'
-import { Group } from 'three'
+import * as THREE from 'three'
 import { PositionLogger } from './components/PositionLogger'
 import './styles.css'
+import { getPosePositionOrientation } from './utils'
 
-import * as THREE from 'three';
 
 function Floor(props) {
   return (
@@ -67,20 +67,24 @@ texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set( 10, 5 );
 
 function Overlay () {
-  const { camera } = useThree();
-
   const [position, setPosition] = useState([0, 0, 0])
   const [rotation, setRotation] = useState([0, 0, 0])
+  const { gl } = useThree();
+  
+  useXRFrame(async (time, xrFrame) => {
+    if (!gl.xr.isPresenting) return
 
-  useFrame(() => {
-    const { x, y, z } = camera.position;
-    const { x: rotX, y: rotY, z: rotZ } = camera.rotation;
+    const referenceSpace = gl.xr.getReferenceSpace()
+    const viewerPose = xrFrame.getViewerPose(referenceSpace)
 
-    setPosition([x, y, z-1])
-    setRotation([rotX, rotY, rotZ])
+    const { position: pos, orientation: ori } = getPosePositionOrientation(viewerPose)
+
+    setPosition([pos.x, pos.y, pos.z])
+    setRotation([ori.x, ori.y, ori.z])
   })
 
   return (
+    // @ts-ignore
     <group position={position} rotation={rotation}>
       <Sphere scale={3} position={[0, 0,  0]}>
         <meshBasicMaterial
