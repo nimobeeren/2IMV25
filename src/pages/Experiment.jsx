@@ -1,10 +1,9 @@
-import { Plane, Sky, Sphere, Text } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
-import { DefaultXRControllers, useXRFrame, VRCanvas } from '@react-three/xr'
+import { Plane, Sky, Sphere, Text, useTexture } from '@react-three/drei'
+import { useFrame, useThree } from '@react-three/fiber'
+import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
 import React, { useState } from 'react'
 import * as THREE from 'three'
 import { PositionLogger } from '../components/vr/PositionLogger'
-import { getPosePositionOrientation } from '../utils'
 
 function Floor(props) {
 	return (
@@ -43,43 +42,33 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
 	)
 }
 
-const texture = new THREE.TextureLoader().load('hole.png')
-texture.wrapS = THREE.RepeatWrapping
-texture.wrapT = THREE.RepeatWrapping
-texture.repeat.set(10, 5)
-
 function Overlay() {
 	const [position, setPosition] = useState([0, 0, 0])
 	const [rotation, setRotation] = useState([0, 0, 0])
-	const { gl } = useThree()
 
-	useXRFrame(async (time, xrFrame) => {
-		if (!gl.xr.isPresenting) return
+	const { camera } = useThree()
 
-		const referenceSpace = gl.xr.getReferenceSpace()
-		const viewerPose = xrFrame.getViewerPose(referenceSpace)
+	const texture = useTexture('hole.png')
+	texture.wrapS = THREE.RepeatWrapping
+	texture.wrapT = THREE.RepeatWrapping
+	texture.repeat.set(10, 5)
 
-		const { position: pos, orientation: ori } =
-			getPosePositionOrientation(viewerPose)
-
-		setPosition([pos.x, pos.y, pos.z])
-		setRotation([ori.x, ori.y, ori.z])
+	useFrame(() => {
+		setPosition([camera.position.x, camera.position.y, camera.position.z])
+		setRotation([camera.rotation.x, camera.rotation.y, camera.rotation.z])
 	})
 
 	return (
-		// @ts-ignore
-		<group position={position} rotation={rotation}>
-			<Sphere scale={3} position={[0, 0, 0]}>
-				<meshBasicMaterial
-					transparent={true}
-					// opacity={0.5}
-					attach='material'
-					color='black'
-					alphaMap={texture}
-					side={THREE.BackSide}
-				/>
-			</Sphere>
-		</group>
+		<Sphere position={position} rotation={rotation}>
+			<meshBasicMaterial
+				transparent
+				// opacity={0.5}
+				attach='material'
+				color='black'
+				alphaMap={texture}
+				side={THREE.BackSide}
+			/>
+		</Sphere>
 	)
 }
 
