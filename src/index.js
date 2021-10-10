@@ -1,8 +1,13 @@
-import { Plane, Sky, Text } from '@react-three/drei'
-import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
+import { Html, Plane, Sky, Text, Circle, Sphere } from '@react-three/drei'
+import { useFrame, useThree } from '@react-three/fiber'
+import { DefaultXRControllers, useXRFrame, VRCanvas } from '@react-three/xr'
+import { useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
+import { Group } from 'three'
 import { PositionLogger } from './components/PositionLogger'
 import './styles.css'
+
+import * as THREE from 'three';
 
 function Floor(props) {
   return (
@@ -39,6 +44,57 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
   )
 }
 
+// function Overlay () {
+//   return (
+//     <div id="overlay">
+//       <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+//         <defs>
+//           <mask id="myMask">
+//             <rect width="100%" height="100%" fill="white"/>
+//             <circle cx="50%" cy="50%" r="6rem" fill="black"/>
+//           </mask>
+//         </defs>
+
+//         <rect x="0" y="0" width="100%" height="100%" fill="black" mask="url(#myMask)"/>
+//       </svg>
+//     </div>
+//   )
+// }
+
+const texture = new THREE.TextureLoader().load("hole.png");
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+texture.repeat.set( 10, 5 );
+
+function Overlay () {
+  const { camera } = useThree();
+
+  const [position, setPosition] = useState([0, 0, 0])
+  const [rotation, setRotation] = useState([0, 0, 0])
+
+  useFrame(() => {
+    const { x, y, z } = camera.position;
+    const { x: rotX, y: rotY, z: rotZ } = camera.rotation;
+
+    setPosition([x, y, z-1])
+    setRotation([rotX, rotY, rotZ])
+  })
+
+  return (
+    <group position={position} rotation={rotation}>
+      <Sphere scale={3} position={[0, 0,  0]}>
+        <meshBasicMaterial
+          transparent={true}
+          // opacity={0.5}
+          attach="material"
+          color="black"
+          alphaMap={texture}
+          side={THREE.BackSide} />
+      </Sphere>
+    </group>
+  )
+}
+
 function App() {
   return (
     <VRCanvas>
@@ -52,6 +108,7 @@ function App() {
       <Wall position={[5, 0, 0]} rotation={[0, -Math.PI / 2, 0]} color="#aaaa00" />
       <Wall position={[-5, 0, 0]} rotation={[0, Math.PI / 2, 0]} color="#aa0000" />
       <Wall position={[0, 0, 5]} rotation={[0, Math.PI, 0]} color="#0000aa" numTargets={[0, 0]} />
+      <Overlay />
     </VRCanvas>
   )
 }
