@@ -1,3 +1,4 @@
+import { animated, useSpring } from '@react-spring/three'
 import { Plane, Sky, Sphere, Text, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
@@ -42,9 +43,15 @@ function Wall({ color, numTargets = [10, 10], ...restProps }) {
 	)
 }
 
+const ASphere = animated(Sphere)
+
 function Overlay() {
 	const [position, setPosition] = useState([0, 0, 0])
 	const [rotation, setRotation] = useState([0, 0, 0])
+	const { rotation: interpRotation } = useSpring({
+		to: { rotation },
+		config: { duration: 50 }
+	})
 
 	const { camera } = useThree()
 
@@ -58,7 +65,7 @@ function Overlay() {
 	})
 
 	return (
-		<Sphere position={position} rotation={rotation}>
+		<ASphere position={position} rotation={interpRotation}>
 			<meshBasicMaterial
 				transparent
 				attach='material'
@@ -66,7 +73,7 @@ function Overlay() {
 				alphaMap={texture}
 				side={THREE.BackSide}
 			/>
-		</Sphere>
+		</ASphere>
 	)
 }
 
