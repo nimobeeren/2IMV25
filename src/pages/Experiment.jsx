@@ -49,9 +49,8 @@ function Overlay() {
 	const { camera } = useThree()
 
 	const texture = useTexture('hole.png')
-	texture.wrapS = THREE.RepeatWrapping
-	texture.wrapT = THREE.RepeatWrapping
 	texture.repeat.set(10, 5)
+	texture.offset.set(-7, -2)
 
 	useFrame(() => {
 		setPosition([camera.position.x, camera.position.y, camera.position.z])
@@ -62,7 +61,6 @@ function Overlay() {
 		<Sphere position={position} rotation={rotation}>
 			<meshBasicMaterial
 				transparent
-				// opacity={0.5}
 				attach='material'
 				color='black'
 				alphaMap={texture}
