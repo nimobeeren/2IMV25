@@ -6,3 +6,5 @@ dist-ssr
 .eslintcache
 coverage
 .nyc_output
+.vscode
+!.vscode/extensions.json
