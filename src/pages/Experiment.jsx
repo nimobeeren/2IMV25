@@ -55,7 +55,7 @@ function Overlay() {
 
 	const { camera } = useThree()
 
-	const texture = useTexture('hole.png')
+	const texture = useTexture('hole4.png')
 	texture.repeat.set(10, 5)
 	texture.offset.set(-7, -2)
 
