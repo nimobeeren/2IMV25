@@ -6,7 +6,6 @@ import '../index.css'
 
 const characterSet1 = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
 const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
-const developMode = true
 const numberOfTargets = 6
 const roomSize = 1
 const letterSize = roomSize / numberOfTargets
@@ -224,40 +223,34 @@ function Experiment() {
         <PositionLogger />
         {/* Top wall */}
         <Ceiling
-          position={developMode ? [0, 5, -5] : [0, 5, 0]}
           rotation={[Math.PI / 2, 0, 0]}
           color='#ececec'
         />
         {/* Bottom wall */}
         <Floor
-          position={developMode ? [0, -5, -5] : [0, -5, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
           color='#ececec'
         />
         {/* Back wall */}
         <Wall
-          position={developMode ? [0, 0, -10] : [0, 0, -5]}
           rotation={[0, 0, 0]}
           color='#ececec'
           side='back'
         />
         {/* Right wall */}
         <Wall
-          position={developMode ? [5, 0, -5] : [5, 0, 0]}
           rotation={[0, -Math.PI / 2, 0]}
           color='#ececec'
           side='right'
         />
         {/* Left wall */}
         <Wall
-          position={developMode ? [-5, 0, -5] : [-5, 0, 0]}
           rotation={[0, Math.PI / 2, 0]}
           color='#ececec'
           side='left'
         />
         {/* Front wall */}
         <Wall
-          position={developMode ? [0, 0, 5] : [0, 0, 5]}
           rotation={[0, Math.PI, 0]}
           color='#ececec'
         />
