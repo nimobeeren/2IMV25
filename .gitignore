@@ -1,10 +1,16 @@
-node_modules
+# Standard stuff
 .DS_Store
+node_modules
+
+# Output
 dist
 dist-ssr
 *.local
 .eslintcache
 coverage
 .nyc_output
+log.json
+
+# IDE stuff
 .vscode
 !.vscode/extensions.json

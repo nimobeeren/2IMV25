@@ -1,8 +1,10 @@
-import { Plane, Text } from '@react-three/drei'
+import { animated, useSpring } from '@react-spring/three'
+import { Plane, Sphere, Text, useTexture } from '@react-three/drei'
+import { useFrame, useThree } from '@react-three/fiber'
 import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
-import Head from '../components/Head'
+import React, { useState } from 'react'
+import * as THREE from 'three'
 import { PositionLogger } from '../components/vr/PositionLogger'
-import '../index.css'
 
 const characterSet1 = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
 const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
@@ -212,51 +214,122 @@ function Ceiling({
 	)
 }
 
+const ASphere = animated(Sphere)
+
+function Overlay() {
+	const [position, setPosition] = useState([0, 0, 0])
+	const [rotation, setRotation] = useState([0, 0, 0])
+	const { rotation: interpRotation } = useSpring({
+		to: { rotation },
+		config: { duration: 50 }
+	})
+
+	const { camera } = useThree()
+
+	const texture = useTexture('hole4.png')
+	texture.repeat.set(10, 5)
+	texture.offset.set(-7, -2)
+
+	useFrame(() => {
+		setPosition([camera.position.x, camera.position.y, camera.position.z])
+		setRotation([camera.rotation.x, camera.rotation.y, camera.rotation.z])
+	})
+
+	return (
+		<ASphere position={position} rotation={interpRotation}>
+			<meshBasicMaterial
+				transparent
+				attach='material'
+				color='black'
+				alphaMap={texture}
+				side={THREE.BackSide}
+			/>
+		</ASphere>
+	)
+}
+
+const VR = React.memo(function VR({ logFile }) {
+	return (
+		<VRCanvas>
+			<ambientLight />
+			<pointLight position={[10, 10, 10]} />
+			<DefaultXRControllers />
+			<PositionLogger logFile={logFile} />
+			<Overlay />
+			{/* Top wall */}
+			<Ceiling
+				position={[0, 5, 0]}
+				rotation={[Math.PI / 2, 0, 0]}
+				color='#ececec'
+			/>
+			{/* Bottom wall */}
+			<Floor
+				position={[0, -5, 0]}
+				rotation={[-Math.PI / 2, 0, 0]}
+				color='#ececec'
+			/>
+			{/* Back wall */}
+			<Wall
+				position={[0, 0, -5]}
+				rotation={[0, 0, 0]}
+				color='#ececec'
+				side='back'
+			/>
+			{/* Right wall */}
+			<Wall
+				position={[5, 0, 0]}
+				rotation={[0, -Math.PI / 2, 0]}
+				color='#ececec'
+				side='right'
+			/>
+			{/* Left wall */}
+			<Wall
+				position={[-5, 0, 0]}
+				rotation={[0, Math.PI / 2, 0]}
+				color='#ececec'
+				side='left'
+			/>
+			{/* Front wall */}
+			<Wall position={[0, 0, 5]} rotation={[0, Math.PI, 0]} color='#ececec' />
+		</VRCanvas>
+	)
+})
+
 function Experiment() {
+	const [logFile, setLogFile] = useState(null)
+
 	return (
 		<>
-			<Head title='Quantifying Immersion Experiment' />
-			<VRCanvas>
-				<ambientLight />
-				<pointLight position={[10, 10, 10]} />
-				<DefaultXRControllers />
-				<PositionLogger />
-				{/* Top wall */}
-				<Ceiling
-					position={[0, 5, 0]}
-					rotation={[Math.PI / 2, 0, 0]}
-					color='#ececec'
-				/>
-				{/* Bottom wall */}
-				<Floor
-					position={[0, -5, 0]}
-					rotation={[-Math.PI / 2, 0, 0]}
-					color='#ececec'
-				/>
-				{/* Back wall */}
-				<Wall
-					position={[0, 0, -5]}
-					rotation={[0, 0, 0]}
-					color='#ececec'
-					side='back'
-				/>
-				{/* Right wall */}
-				<Wall
-					position={[5, 0, 0]}
-					rotation={[0, -Math.PI / 2, 0]}
-					color='#ececec'
-					side='right'
-				/>
-				{/* Left wall */}
-				<Wall
-					position={[-5, 0, 0]}
-					rotation={[0, Math.PI / 2, 0]}
-					color='#ececec'
-					side='left'
-				/>
-				{/* Front wall */}
-				<Wall position={[0, 0, 5]} rotation={[0, Math.PI, 0]} color='#ececec' />
-			</VRCanvas>
+			<div className='fixed bottom-4 right-4 z-10 flex gap-2 items-center'>
+				<button
+					className='flex justify-center bg-gray-800  hover:bg-gray-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-200'
+					onClick={async () => {
+						try {
+							const fileHandle = await showSaveFilePicker({
+								suggestedName: 'log.json',
+								startIn: 'desktop',
+								types: [
+									{
+										description: 'JSON log file',
+										accept: {
+											'application/json': ['.json']
+										}
+									}
+								]
+							})
+							setLogFile(fileHandle)
+							console.info('Set log location')
+						} catch (err) {
+							console.error(
+								'Failed to set log location with error\n' + err.toString()
+							)
+						}
+					}}
+				>
+					Set log location
+				</button>
+			</div>
+			<VR logFile={logFile} />
 		</>
 	)
 }

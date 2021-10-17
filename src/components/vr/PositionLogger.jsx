@@ -1,57 +1,54 @@
-import { useThree } from '@react-three/fiber'
-import { useXRFrame } from '@react-three/xr'
-import { Euler, Quaternion } from 'three'
+import { useFrame, useThree } from '@react-three/fiber'
+import { useEffect, useState } from 'react'
 
-export function PositionLogger() {
-	const { gl } = useThree()
+export function PositionLogger({ logFile }) {
+	const [headLog, setHeadLog] = useState({
+		position: [],
+		rotation: []
+	})
 
-	useXRFrame(async (time, xrFrame) => {
+	const { gl, camera } = useThree()
+
+	// When leaving presenting mode, and if a log file exists,
+	// write the log to the file
+	useEffect(() => {
+		if (logFile && !gl.xr.isPresenting && headLog.position.length > 0) {
+			const writeLog = async () => {
+				try {
+					const stream = await logFile.createWritable()
+					stream.write(JSON.stringify(headLog))
+					stream.close()
+					console.info('Wrote log to file')
+				} catch (err) {
+					console.error(
+						'Failed to write log to file with error:\n' + err.toString()
+					)
+				}
+			}
+			writeLog()
+		}
+	}, [logFile, gl.xr.isPresenting, headLog])
+
+	// Warn when starting presenting mode without a log file
+	useEffect(() => {
+		if (!logFile && gl.xr.isPresenting) {
+			console.warn('Starting presenting mode without a log file!')
+		}
+	}, [logFile, gl.xr.isPresenting])
+
+	// Log the head position/rotation on every frame
+	useFrame(() => {
 		if (!gl.xr.isPresenting) return
 
-		const referenceSpace = gl.xr.getReferenceSpace()
-		const viewerPose = xrFrame.getViewerPose(referenceSpace)
-
-		// https://developer.mozilla.org/en-US/docs/Web/API/XRView
-		const leftEyeView = viewerPose.views[0]
-		const rightEyeView = viewerPose.views[1]
-
-		// Get the average position of the two eyes
-		const avgEyePosition = DOMPointReadOnly.fromPoint({
-			x:
-				(leftEyeView.transform.position.x + rightEyeView.transform.position.x) /
-				2,
-			y:
-				(leftEyeView.transform.position.y + rightEyeView.transform.position.y) /
-				2,
-			z:
-				(leftEyeView.transform.position.z + rightEyeView.transform.position.z) /
-				2,
-			w:
-				(leftEyeView.transform.position.w + rightEyeView.transform.position.w) /
-				2
-		})
-
-		console.log('position', {
-			x: avgEyePosition.x.toFixed(2),
-			y: avgEyePosition.y.toFixed(2),
-			z: avgEyePosition.z.toFixed(2)
-		})
-
-		// Get the Euler angles, which represent a rotation over the x, y and z axes
-		const euler = new Euler().setFromQuaternion(
-			new Quaternion(
-				leftEyeView.transform.orientation.x,
-				leftEyeView.transform.orientation.y,
-				leftEyeView.transform.orientation.z,
-				leftEyeView.transform.orientation.w
-			)
-		)
-
-		console.log('orientation', {
-			x: euler.x.toFixed(2),
-			y: euler.y.toFixed(2),
-			z: euler.z.toFixed(2)
-		})
+		// Append the current head position/rotation to the log
+		const newHead = {
+			position: [camera.position.x, camera.position.y, camera.position.z],
+			rotation: [camera.rotation.x, camera.rotation.y, camera.rotation.z]
+		}
+		setHeadLog(prevLog => ({
+			position: [...prevLog.position, newHead.position],
+			rotation: [...prevLog.rotation, newHead.rotation]
+		}))
 	})
 
 	return null
