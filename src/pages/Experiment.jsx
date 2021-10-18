@@ -11,6 +11,7 @@ const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
 const numberOfTargets = 6
 const roomSize = 1
 const letterSize = roomSize / numberOfTargets
+const hasOverlay = true
 
 const radiusInnerFloor = 0.25
 const radiusOuterFloor = 0.4
@@ -62,7 +63,7 @@ function Wall({
 	...restProps
 }) {
 	return (
-		<Plane scale={10} {...restProps}>
+		<Plane scale={4} {...restProps}>
 			<meshPhongMaterial attach='material' color={color} />
 			{Array.from(Array(numTargets[0]).keys()).flatMap(i =>
 				Array.from(Array(numTargets[1]).keys()).map(j => {
@@ -100,7 +101,7 @@ function Floor({
 	...restProps
 }) {
 	return (
-		<Plane scale={10} {...restProps}>
+		<Plane scale={4} {...restProps}>
 			<meshPhongMaterial attach='material' color={color} />
 			{Array.from(Array(numTargets[0]).keys()).map(i => {
 				const letter =
@@ -161,7 +162,7 @@ function Ceiling({
 	...restProps
 }) {
 	return (
-		<Plane scale={10} {...restProps}>
+		<Plane scale={4} {...restProps}>
 			<meshPhongMaterial attach='material' color={color} />
 			{Array.from(Array(numTargets[0]).keys()).map(i => {
 				const letter =
@@ -251,46 +252,49 @@ function Overlay() {
 const VR = React.memo(function VR({ logFile }) {
 	return (
 		<VRCanvas>
-			<ambientLight />
-			<pointLight position={[10, 10, 10]} />
 			<DefaultXRControllers />
 			<PositionLogger logFile={logFile} />
-			<Overlay />
+
+			<pointLight position={[1, 3, 0]} intensity={0.8}/>
+			<pointLight position={[-1, 3, 0]} intensity={0.8}/>
+
+			{ hasOverlay && <Overlay /> }
+
 			{/* Top wall */}
 			<Ceiling
-				position={[0, 5, 0]}
+				position={[0, 4, 0]}
 				rotation={[Math.PI / 2, 0, 0]}
 				color='#ececec'
 			/>
 			{/* Bottom wall */}
 			<Floor
-				position={[0, -5, 0]}
+				position={[0, 0, 0]}
 				rotation={[-Math.PI / 2, 0, 0]}
 				color='#ececec'
 			/>
 			{/* Back wall */}
 			<Wall
-				position={[0, 0, -5]}
+				position={[0, 2, -2]}
 				rotation={[0, 0, 0]}
 				color='#ececec'
 				side='back'
 			/>
 			{/* Right wall */}
 			<Wall
-				position={[5, 0, 0]}
+				position={[2, 2, 0]}
 				rotation={[0, -Math.PI / 2, 0]}
 				color='#ececec'
 				side='right'
 			/>
 			{/* Left wall */}
 			<Wall
-				position={[-5, 0, 0]}
+				position={[-2, 2, 0]}
 				rotation={[0, Math.PI / 2, 0]}
 				color='#ececec'
 				side='left'
 			/>
 			{/* Front wall */}
-			<Wall position={[0, 0, 5]} rotation={[0, Math.PI, 0]} color='#ececec' />
+			<Wall position={[0, 2, 2]} rotation={[0, Math.PI, 0]} color='#ececec' />
 		</VRCanvas>
 	)
 })
