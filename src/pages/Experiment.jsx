@@ -6,6 +6,8 @@ import React, { useState } from 'react'
 import * as THREE from 'three'
 import { PositionLogger } from '../components/vr/PositionLogger'
 
+import { EXPERIMENT_ROUNDS } from '../constants'
+
 const characterSet1 = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
 const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
 const numberOfTargets = 6
@@ -23,7 +25,7 @@ const outerPositionsCeiling = [1, 2, 3, 7, 8, 12, 13, 17, 18]
 /**
  * Returns the door on the back wall.
  */
-function Door() {
+function Door({ round }) {
 	const [doorColor, setDoorColor] = useState('#8B4513')
 
 	useXREvent('squeeze', (e) => {
@@ -36,7 +38,25 @@ function Door() {
 			key={`door`}
 			position={[letterSize, -roomSize / 4, 0.011]}
 		>
-			<meshPhongMaterial attach='material' color={doorColor} />
+			<Text
+				key={`round-name`}
+				position={[0, 0.1, 0.0001]}
+				fontSize={0.05}
+				color='#000000'
+				anchorX='center'
+				anchorY='middle'
+			>Round: {round.round}</Text>
+			{ round.paused &&
+				<Text
+					key={`round-paused`}
+					position={[0, 0, 0.0001]}
+					fontSize={0.05}
+					color='#000000'
+					anchorX='center'
+					anchorY='middle'
+				>Paused</Text>
+			}
+			<meshPhongMaterial attach='material' color='#8B4513' />
 		</Plane>
 	)
 }
@@ -66,6 +86,7 @@ function Wall({
 	color,
 	numTargets = [numberOfTargets, numberOfTargets],
 	side = 'regular',
+	round,
 	...restProps
 }) {
 	return (
@@ -91,7 +112,7 @@ function Wall({
 					)
 				})
 			)}
-			{side === 'back' && Door()}
+			{side === 'back' && Door({ round })}
 			{(side === 'right' || side === 'left') && Window(side)}
 		</Plane>
 	)
@@ -254,9 +275,30 @@ function Overlay() {
 		</ASphere>
 	)
 }
+
 const VR = React.memo(function VR({ logFile }) {
+	const [round, setRound] = useState({
+		round: 0,
+		paused: false
+	})
+
+	useXREvent('squeeze', (e) => {
+		if (round.paused) {
+			const newRound = (round.round + 1) % EXPERIMENT_ROUNDS.length
+			setRound({
+				round: newRound,
+				paused: false
+			})
+		} else {
+			setRound({
+				round: round.round,
+				paused: true
+			})
+		}
+	})
+
 	return (
-		<VRCanvas>
+		<>
 			<DefaultXRControllers />
 			<PositionLogger logFile={logFile} />
 
@@ -283,6 +325,7 @@ const VR = React.memo(function VR({ logFile }) {
 				rotation={[0, 0, 0]}
 				color='#ececec'
 				side='back'
+				round={round}
 			/>
 			{/* Right wall */}
 			<Wall
@@ -300,7 +343,7 @@ const VR = React.memo(function VR({ logFile }) {
 			/>
 			{/* Front wall */}
 			<Wall position={[0, 2, 2]} rotation={[0, Math.PI, 0]} color='#ececec' />
-		</VRCanvas>
+		</>
 	)
 })
 
@@ -338,7 +381,9 @@ function Experiment() {
 					Set log location
 				</button>
 			</div>
-			<VR logFile={logFile} />
+			<VRCanvas>
+				<VR logFile={logFile} />
+			</VRCanvas>
 		</>
 	)
 }
