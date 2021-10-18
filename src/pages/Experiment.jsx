@@ -24,13 +24,19 @@ const outerPositionsCeiling = [1, 2, 3, 7, 8, 12, 13, 17, 18]
  * Returns the door on the back wall.
  */
 function Door() {
+	const [doorColor, setDoorColor] = useState('#8B4513')
+
+	useXREvent('squeeze', (e) => {
+		setDoorColor('#000000')
+	})
+
 	return (
 		<Plane
 			args={[letterSize * 1.75, roomSize / 2]}
 			key={`door`}
 			position={[letterSize, -roomSize / 4, 0.011]}
 		>
-			<meshPhongMaterial attach='material' color={'#8B4513'} />
+			<meshPhongMaterial attach='material' color={doorColor} />
 		</Plane>
 	)
 }
@@ -248,22 +254,11 @@ function Overlay() {
 		</ASphere>
 	)
 }
-
-function ButtonEvent () {
-	useXREvent('squeeze', (e) => {
-		window.alert('AAAA')
-	})
-
-	return (<></>)
-}
-
 const VR = React.memo(function VR({ logFile }) {
 	return (
 		<VRCanvas>
 			<DefaultXRControllers />
 			<PositionLogger logFile={logFile} />
-
-			<ButtonEvent />
 
 			<pointLight position={[1, 3, 0]} intensity={0.8}/>
 			<pointLight position={[-1, 3, 0]} intensity={0.8}/>
