@@ -11,6 +11,7 @@ const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
 const numberOfTargets = 6
 const roomSize = 1
 const letterSize = roomSize / numberOfTargets
+const hasOverlay = true
 
 const radiusInnerFloor = 0.25
 const radiusOuterFloor = 0.4
@@ -257,7 +258,8 @@ const VR = React.memo(function VR({ logFile }) {
 			<pointLight position={[1, 3, 0]} intensity={0.8}/>
 			<pointLight position={[-1, 3, 0]} intensity={0.8}/>
 
-			{/* <Overlay /> */}
+			{ hasOverlay && <Overlay /> }
+
 			{/* Top wall */}
 			<Ceiling
 				position={[0, 4, 0]}
