@@ -251,10 +251,11 @@ function Overlay() {
 const VR = React.memo(function VR({ logFile }) {
 	return (
 		<VRCanvas>
-			<ambientLight />
-			<pointLight position={[10, 10, 10]} />
 			<DefaultXRControllers />
 			<PositionLogger logFile={logFile} />
+
+			<pointLight position={[1, 3, 0]} intensity={0.8}/>
+			<pointLight position={[-1, 3, 0]} intensity={0.8}/>
 
 			{/* <Overlay /> */}
 			{/* Top wall */}
