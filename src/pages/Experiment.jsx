@@ -255,42 +255,45 @@ const VR = React.memo(function VR({ logFile }) {
 			<pointLight position={[10, 10, 10]} />
 			<DefaultXRControllers />
 			<PositionLogger logFile={logFile} />
-			<Overlay />
-			{/* Top wall */}
-			<Ceiling
-				position={[0, 5, 0]}
-				rotation={[Math.PI / 2, 0, 0]}
-				color='#ececec'
-			/>
-			{/* Bottom wall */}
-			<Floor
-				position={[0, -5, 0]}
-				rotation={[-Math.PI / 2, 0, 0]}
-				color='#ececec'
-			/>
-			{/* Back wall */}
-			<Wall
-				position={[0, 0, -5]}
-				rotation={[0, 0, 0]}
-				color='#ececec'
-				side='back'
-			/>
-			{/* Right wall */}
-			<Wall
-				position={[5, 0, 0]}
-				rotation={[0, -Math.PI / 2, 0]}
-				color='#ececec'
-				side='right'
-			/>
-			{/* Left wall */}
-			<Wall
-				position={[-5, 0, 0]}
-				rotation={[0, Math.PI / 2, 0]}
-				color='#ececec'
-				side='left'
-			/>
-			{/* Front wall */}
-			<Wall position={[0, 0, 5]} rotation={[0, Math.PI, 0]} color='#ececec' />
+
+			<group position={[0, 3, 0]}>
+				<Overlay />
+				{/* Top wall */}
+				<Ceiling
+					position={[0, 5, 0]}
+					rotation={[Math.PI / 2, 0, 0]}
+					color='#ececec'
+				/>
+				{/* Bottom wall */}
+				<Floor
+					position={[0, -5, 0]}
+					rotation={[-Math.PI / 2, 0, 0]}
+					color='#ececec'
+				/>
+				{/* Back wall */}
+				<Wall
+					position={[0, 0, -5]}
+					rotation={[0, 0, 0]}
+					color='#ececec'
+					side='back'
+				/>
+				{/* Right wall */}
+				<Wall
+					position={[5, 0, 0]}
+					rotation={[0, -Math.PI / 2, 0]}
+					color='#ececec'
+					side='right'
+				/>
+				{/* Left wall */}
+				<Wall
+					position={[-5, 0, 0]}
+					rotation={[0, Math.PI / 2, 0]}
+					color='#ececec'
+					side='left'
+				/>
+				{/* Front wall */}
+				<Wall position={[0, 0, 5]} rotation={[0, Math.PI, 0]} color='#ececec' />
+			</group>
 		</VRCanvas>
 	)
 })
