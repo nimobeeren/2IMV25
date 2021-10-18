@@ -256,8 +256,8 @@ const VR = React.memo(function VR({ logFile }) {
 			<DefaultXRControllers />
 			<PositionLogger logFile={logFile} />
 
-			<group position={[0, 3, 0]}>
-				<Overlay />
+			<group position={[0, 2.5, 0]} scale={0.5}>
+				{/* <Overlay /> */}
 				{/* Top wall */}
 				<Ceiling
 					position={[0, 5, 0]}
