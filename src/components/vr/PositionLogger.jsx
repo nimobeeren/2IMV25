@@ -1,4 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber'
+import { useXREvent } from '@react-three/xr'
 import { useEffect, useState } from 'react'
 
 export function PositionLogger({ logFile }) {

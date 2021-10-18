@@ -1,7 +1,7 @@
 import { animated, useSpring } from '@react-spring/three'
 import { Plane, Sphere, Text, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
+import { DefaultXRControllers, useXREvent, VRCanvas } from '@react-three/xr'
 import React, { useState } from 'react'
 import * as THREE from 'three'
 import { PositionLogger } from '../components/vr/PositionLogger'
@@ -249,11 +249,21 @@ function Overlay() {
 	)
 }
 
+function ButtonEvent () {
+	useXREvent('squeeze', (e) => {
+		window.alert('AAAA')
+	})
+
+	return (<></>)
+}
+
 const VR = React.memo(function VR({ logFile }) {
 	return (
 		<VRCanvas>
 			<DefaultXRControllers />
 			<PositionLogger logFile={logFile} />
+
+			<ButtonEvent />
 
 			<pointLight position={[1, 3, 0]} intensity={0.8}/>
 			<pointLight position={[-1, 3, 0]} intensity={0.8}/>
