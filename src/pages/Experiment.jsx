@@ -6,14 +6,13 @@ import React, { useState } from 'react'
 import * as THREE from 'three'
 import { PositionLogger } from '../components/vr/PositionLogger'
 
-import { EXPERIMENT_ROUNDS } from '../constants'
+import { EXPERIMENT_ROUNDS, DEFAULT_ROUND } from '../constants'
 
 const characterSet1 = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
 const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
 const numberOfTargets = 6
 const roomSize = 1
 const letterSize = roomSize / numberOfTargets
-const hasOverlay = true
 
 const radiusInnerFloor = 0.25
 const radiusOuterFloor = 0.4
@@ -26,12 +25,6 @@ const outerPositionsCeiling = [1, 2, 3, 7, 8, 12, 13, 17, 18]
  * Returns the door on the back wall.
  */
 function Door({ round }) {
-	const [doorColor, setDoorColor] = useState('#8B4513')
-
-	useXREvent('squeeze', (e) => {
-		setDoorColor('#000000')
-	})
-
 	return (
 		<Plane
 			args={[letterSize * 1.75, roomSize / 2]}
@@ -40,21 +33,21 @@ function Door({ round }) {
 		>
 			<Text
 				key={`round-name`}
-				position={[0, 0.1, 0.0001]}
+				position={[0, 0.05, 0.0001]}
 				fontSize={0.05}
 				color='#000000'
 				anchorX='center'
 				anchorY='middle'
-			>Round: {round.round}</Text>
+			>Round: {round.n}</Text>
 			{ round.paused &&
 				<Text
 					key={`round-paused`}
-					position={[0, 0, 0.0001]}
-					fontSize={0.05}
+					position={[0, -0.01, 0.0001]}
+					fontSize={0.02}
 					color='#000000'
 					anchorX='center'
 					anchorY='middle'
-				>Paused</Text>
+				>Squeeze for Next Round</Text>
 			}
 			<meshPhongMaterial attach='material' color='#8B4513' />
 		</Plane>
@@ -92,7 +85,7 @@ function Wall({
 	return (
 		<Plane scale={4} {...restProps}>
 			<meshPhongMaterial attach='material' color={color} />
-			{Array.from(Array(numTargets[0]).keys()).flatMap(i =>
+			{round.displayLetters && Array.from(Array(numTargets[0]).keys()).flatMap(i =>
 				Array.from(Array(numTargets[1]).keys()).map(j => {
 					const letter =
 						characterSet1[Math.floor(Math.random() * characterSet1.length)]
@@ -125,12 +118,13 @@ function Floor({
 	color,
 	numTargets = [11, 22],
 	side = 'regular',
+	round,
 	...restProps
 }) {
 	return (
 		<Plane scale={4} {...restProps}>
 			<meshPhongMaterial attach='material' color={color} />
-			{Array.from(Array(numTargets[0]).keys()).map(i => {
+			{round.displayLetters && Array.from(Array(numTargets[0]).keys()).map(i => {
 				const letter =
 					characterSet1[Math.floor(Math.random() * characterSet1.length)]
 				const a = (2 * Math.PI) / numTargets[0]
@@ -151,7 +145,7 @@ function Floor({
 					</Text>
 				)
 			})}
-			{Array.from(Array(numTargets[1]).keys()).map(i => {
+			{round.displayLetters && Array.from(Array(numTargets[1]).keys()).map(i => {
 				const letter =
 					characterSet1[Math.floor(Math.random() * characterSet1.length)]
 				const a = (2 * Math.PI) / numTargets[1]
@@ -186,12 +180,13 @@ function Ceiling({
 	color,
 	numTargets = [12, 20],
 	side = 'regular',
+	round,
 	...restProps
 }) {
 	return (
 		<Plane scale={4} {...restProps}>
 			<meshPhongMaterial attach='material' color={color} />
-			{Array.from(Array(numTargets[0]).keys()).map(i => {
+			{round.displayLetters && Array.from(Array(numTargets[0]).keys()).map(i => {
 				const letter =
 					characterSet1[Math.floor(Math.random() * characterSet1.length)]
 				const a = (2 * Math.PI) / numTargets[0]
@@ -213,7 +208,7 @@ function Ceiling({
 					</Text>
 				)
 			})}
-			{Array.from(Array(numTargets[1]).keys()).map(i => {
+			{round.displayLetters && Array.from(Array(numTargets[1]).keys()).map(i => {
 				const letter =
 					characterSet1[Math.floor(Math.random() * characterSet1.length)]
 				const a = (2 * Math.PI) / numTargets[1]
@@ -278,21 +273,25 @@ function Overlay() {
 
 const VR = React.memo(function VR({ logFile }) {
 	const [round, setRound] = useState({
-		round: 0,
+		...DEFAULT_ROUND,
+		n: 0,
 		paused: false
 	})
 
 	useXREvent('squeeze', (e) => {
 		if (round.paused) {
-			const newRound = (round.round + 1) % EXPERIMENT_ROUNDS.length
+			const n = (round.n + 1) % EXPERIMENT_ROUNDS.length
 			setRound({
-				round: newRound,
-				paused: false
+				n,
+				paused: false,
+				...EXPERIMENT_ROUNDS[n]
 			})
 		} else {
+			console.log({ ...round })
 			setRound({
-				round: round.round,
-				paused: true
+				...round,
+				displayLetters: false,
+				paused: true,
 			})
 		}
 	})
@@ -305,19 +304,21 @@ const VR = React.memo(function VR({ logFile }) {
 			<pointLight position={[1, 3, 0]} intensity={0.8}/>
 			<pointLight position={[-1, 3, 0]} intensity={0.8}/>
 
-			{ hasOverlay && <Overlay /> }
+			{ round.overlay && <Overlay /> }
 
 			{/* Top wall */}
 			<Ceiling
 				position={[0, 4, 0]}
 				rotation={[Math.PI / 2, 0, 0]}
 				color='#ececec'
+				round={round}
 			/>
 			{/* Bottom wall */}
 			<Floor
 				position={[0, 0, 0]}
 				rotation={[-Math.PI / 2, 0, 0]}
 				color='#ececec'
+				round={round}
 			/>
 			{/* Back wall */}
 			<Wall
@@ -333,6 +334,7 @@ const VR = React.memo(function VR({ logFile }) {
 				rotation={[0, -Math.PI / 2, 0]}
 				color='#ececec'
 				side='right'
+				round={round}
 			/>
 			{/* Left wall */}
 			<Wall
@@ -340,9 +342,14 @@ const VR = React.memo(function VR({ logFile }) {
 				rotation={[0, Math.PI / 2, 0]}
 				color='#ececec'
 				side='left'
+				round={round}
 			/>
 			{/* Front wall */}
-			<Wall position={[0, 2, 2]} rotation={[0, Math.PI, 0]} color='#ececec' />
+			<Wall
+				position={[0, 2, 2]}
+				rotation={[0, Math.PI, 0]}
+				color='#ececec'
+				round={round} />
 		</>
 	)
 })

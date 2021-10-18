@@ -21,3 +21,9 @@ export const EXPERIMENT_ROUNDS = [
 	{ displayLetters: true, targetPresent: true, overlay: true },
 	{ displayLetters: true, targetPresent: true, overlay: true }
 ]
+
+export const DEFAULT_ROUND = {
+  displayLetters: false,
+  targetPresent: false,
+  overlay: false
+}
