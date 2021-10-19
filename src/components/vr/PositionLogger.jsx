@@ -34,7 +34,7 @@ export function PositionLogger({ logFile, round }) {
 
 	// Log the head position/rotation on every frame
 	useFrame(() => {
-		if (!gl.xr.isPresenting || round.paused) return
+		if (!gl.xr.isPresenting || round.paused || round.n === 0) return
 
 		// Append the current head position/rotation to the log
 		const newHead = [
