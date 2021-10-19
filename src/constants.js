@@ -1,6 +1,6 @@
 import { generateRounds } from './utils'
 
-export const DEBUG = true
+export const DEBUG = false
 export const CHAR_SET = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
 export const NUM_LETTERS = 6
 export const LETTER_SIZE = 1 / NUM_LETTERS
