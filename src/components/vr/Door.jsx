@@ -1,7 +1,8 @@
 import { Plane, Text } from '@react-three/drei'
 import React from 'react'
 
-import { DEBUG, LETTER_SIZE, EXPERIMENT_ROUNDS } from '../../constants'
+import { LETTER_SIZE } from '../../constants'
+import EXPERIMENT_ROUNDS from '../../rounds.json'
 
 /**
  * Returns the door on the back wall.
@@ -53,16 +54,6 @@ export function Door({ round }) {
 					anchorX='center'
 					anchorY='middle'
 				>Target: {round.target}</Text>
-			}
-			{ DEBUG && round.targetPresent &&
-				<Text
-					key={`round-debug`}
-					position={[0, -0.10, 0.0001]}
-					fontSize={0.02}
-					color='blue'
-					anchorX='center'
-					anchorY='middle'
-				>Target Location: {round.targetLocation}</Text>
 			}
 			<meshPhongMaterial attach='material' color='#8B4513' />
 		</Plane>

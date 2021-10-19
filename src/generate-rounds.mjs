@@ -1,8 +1,8 @@
-import {
-	CEILING,
-	FLOOR,
-	WALL
-} from './constants'
+import { CEILING, FLOOR, WALL } from './constants.mjs'
+import { join } from 'path'
+import { writeFileSync } from 'fs'
+
+const charSet = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
 
 const random = max => Math.floor(Math.random() * max)
 
@@ -61,7 +61,7 @@ const generateTargetLocation = letters => {
 	}
 }
 
-function generateLetters ({ targetPresent, target, charSet }) {
+const generateLetters = ({ targetPresent, target, charSet }) => {
 	// Remove target from the full character set so it is not
 	// added to other places in the walls.
 	if (target) {
@@ -96,7 +96,7 @@ function generateLetters ({ targetPresent, target, charSet }) {
 	return { letters, targetLocation }
 }
 
-export function generateRounds ({ n, targetProbability, charSet, ...others }) {
+const generateRounds = ({ n, targetProbability, charSet, ...others }) => {
 	const rounds = new Array(n)
 	const nPresent = Math.round(n * targetProbability)
 
@@ -115,3 +115,44 @@ export function generateRounds ({ n, targetProbability, charSet, ...others }) {
 
 	return shuffleArray(rounds)
 }
+
+const generateSummary = rounds => rounds.reduce((summary, round, index) => {
+	summary += `Round ${index} --> `
+
+	if (round.targetPresent) {
+		summary += `Target ${round.target} @ ${round.targetLocation}\n`
+	} else {
+		summary += `No target present\n`
+	}
+
+	return summary
+}, '')
+
+const roundsFile = './rounds.json'
+const roundsSummaryFile = './rounds.txt'
+
+const rounds = [
+	// Introduction --> Room without letters
+	{ displayLetters: false, targetPresent: false, overlay: false },
+
+	// 10 rounds without FOV overlay
+	...generateRounds({
+		n: 10,
+		targetProbability: 0.5,
+		charSet,
+		overlay: false
+	}),
+
+	// 5 round with FOV overlay
+	...generateRounds({
+		n: 5,
+		targetProbability: 0.5,
+		charSet,
+		overlay: true
+	})
+]
+
+const summary = generateSummary(rounds)
+
+writeFileSync(roundsFile, JSON.stringify(rounds))
+writeFileSync(roundsSummaryFile, summary)

@@ -1,13 +1,13 @@
-import { DefaultXRControllers, useXREvent, VRCanvas } from '@react-three/xr'
 import React, { useState } from 'react'
+import { DefaultXRControllers, useXREvent, VRCanvas } from '@react-three/xr'
+import { useThree } from '@react-three/fiber'
 
 import { PositionLogger } from '../components/vr/PositionLogger'
 import { Floor } from '../components/vr/Floor'
 import { Ceiling } from '../components/vr/Ceiling'
 import { Wall } from '../components/vr/Wall'
 import { Overlay } from '../components/vr/Overlay'
-import { EXPERIMENT_ROUNDS } from '../constants'
-import { useThree } from '@react-three/fiber'
+import EXPERIMENT_ROUNDS from '../rounds.json'
 
 const VR = React.memo(function VR() {
 	const { gl } = useThree()
