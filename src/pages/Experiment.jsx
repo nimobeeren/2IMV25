@@ -45,7 +45,7 @@ const VR = React.memo(function VR({ logFile }) {
 	return (
 		<>
 			<DefaultXRControllers />
-			<PositionLogger logFile={logFile} />
+			<PositionLogger logFile={logFile} round={round}/>
 
 			<pointLight position={[1, 3, 0]} intensity={0.8}/>
 			<pointLight position={[-1, 3, 0]} intensity={0.8}/>
