@@ -1,276 +1,70 @@
-import { animated, useSpring } from '@react-spring/three'
-import { Plane, Sphere, Text, useTexture } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
-import { DefaultXRControllers, VRCanvas } from '@react-three/xr'
+import { DefaultXRControllers, useXREvent, VRCanvas } from '@react-three/xr'
 import React, { useState } from 'react'
-import * as THREE from 'three'
+
 import { PositionLogger } from '../components/vr/PositionLogger'
-
-const characterSet1 = ['A', 'K', 'M', 'N', 'V', 'W', 'X', 'Y', 'Z']
-const characterSet2 = ['E', 'F', 'H', 'I', 'L', 'T']
-const numberOfTargets = 6
-const roomSize = 1
-const letterSize = roomSize / numberOfTargets
-const hasOverlay = true
-
-const radiusInnerFloor = 0.25
-const radiusOuterFloor = 0.4
-const radiusInnerCeiling = 0.25
-const radiusOuterCeiling = 0.4
-const outerPositionsFloor = [3, 8, 9, 14, 19, 20]
-const outerPositionsCeiling = [1, 2, 3, 7, 8, 12, 13, 17, 18]
-
-/**
- * Returns the door on the back wall.
- */
-function Door() {
-	return (
-		<Plane
-			args={[letterSize * 1.75, roomSize / 2]}
-			key={`door`}
-			position={[letterSize, -roomSize / 4, 0.011]}
-		>
-			<meshPhongMaterial attach='material' color={'#8B4513'} />
-		</Plane>
-	)
-}
-
-/**
- * Returns the window on one of the walls.
- *
- * @param {string} side The side of the room where the window should be rendered.
- */
-function Window(side) {
-	const direction = side === 'left' ? -1 : 1
-	return (
-		<Plane
-			args={[letterSize, letterSize * 2]}
-			key={`window-${side}`}
-			position={[letterSize * 1.5 * direction, -letterSize, 0.011]}
-		>
-			<meshPhongMaterial attach='material' color={'#87CEEB'} />
-		</Plane>
-	)
-}
-
-/**
- * Returns a wall of the Pausch room.
- */
-function Wall({
-	color,
-	numTargets = [numberOfTargets, numberOfTargets],
-	side = 'regular',
-	...restProps
-}) {
-	return (
-		<Plane scale={4} {...restProps}>
-			<meshPhongMaterial attach='material' color={color} />
-			{Array.from(Array(numTargets[0]).keys()).flatMap(i =>
-				Array.from(Array(numTargets[1]).keys()).map(j => {
-					const letter =
-						characterSet1[Math.floor(Math.random() * characterSet1.length)]
-					const x = (i / (numTargets[0] - 1)) * 0.8 - 0.4
-					const y = (j / (numTargets[1] - 1)) * 0.8 - 0.4
-					return (
-						<Text
-							key={`target-${i}-${j}`}
-							position={[x, y, 0.0001]}
-							fontSize={0.15}
-							color='#000000'
-							anchorX='center'
-							anchorY='middle'
-						>
-							{letter}
-						</Text>
-					)
-				})
-			)}
-			{side === 'back' && Door()}
-			{(side === 'right' || side === 'left') && Window(side)}
-		</Plane>
-	)
-}
-
-/**
- * Returns the floor of the Pausch room.
- */
-function Floor({
-	color,
-	numTargets = [11, 22],
-	side = 'regular',
-	...restProps
-}) {
-	return (
-		<Plane scale={4} {...restProps}>
-			<meshPhongMaterial attach='material' color={color} />
-			{Array.from(Array(numTargets[0]).keys()).map(i => {
-				const letter =
-					characterSet1[Math.floor(Math.random() * characterSet1.length)]
-				const a = (2 * Math.PI) / numTargets[0]
-				const x = radiusInnerFloor * Math.cos(i * a)
-				const y = radiusInnerFloor * Math.sin(i * a)
-				const rotationFloor = i * ((2 * Math.PI) / numTargets[0]) - Math.PI / 2
-				return (
-					<Text
-						key={`target-${i}`}
-						position={[x, y, 0.0001]}
-						fontSize={0.15}
-						color='#000000'
-						anchorX='center'
-						anchorY='middle'
-						rotation={[0, 0, rotationFloor]}
-					>
-						{letter}
-					</Text>
-				)
-			})}
-			{Array.from(Array(numTargets[1]).keys()).map(i => {
-				const letter =
-					characterSet1[Math.floor(Math.random() * characterSet1.length)]
-				const a = (2 * Math.PI) / numTargets[1]
-				const x = radiusOuterFloor * Math.cos(i * a)
-				const y = radiusOuterFloor * Math.sin(i * a)
-				const rotationFloor = i * ((2 * Math.PI) / numTargets[1]) - Math.PI / 2
-
-				if (outerPositionsFloor.includes(i)) {
-					return (
-						<Text
-							key={`target-${i}`}
-							position={[x, y, 0.0001]}
-							fontSize={0.15}
-							color='#000000'
-							anchorX='center'
-							anchorY='middle'
-							rotation={[0, 0, rotationFloor]}
-						>
-							{letter}
-						</Text>
-					)
-				}
-			})}
-		</Plane>
-	)
-}
-
-/**
- * Returns the ceiling of the Pausch room.
- */
-function Ceiling({
-	color,
-	numTargets = [12, 20],
-	side = 'regular',
-	...restProps
-}) {
-	return (
-		<Plane scale={4} {...restProps}>
-			<meshPhongMaterial attach='material' color={color} />
-			{Array.from(Array(numTargets[0]).keys()).map(i => {
-				const letter =
-					characterSet1[Math.floor(Math.random() * characterSet1.length)]
-				const a = (2 * Math.PI) / numTargets[0]
-				const x = radiusInnerCeiling * Math.cos(i * a)
-				const y = radiusInnerCeiling * Math.sin(i * a)
-				const rotationCeiling =
-					i * ((2 * Math.PI) / numTargets[0]) + Math.PI / 2
-				return (
-					<Text
-						key={`target-${i}`}
-						position={[x, y, 0.0001]}
-						fontSize={0.15}
-						color='#000000'
-						anchorX='center'
-						anchorY='middle'
-						rotation={[0, 0, rotationCeiling]}
-					>
-						{letter}
-					</Text>
-				)
-			})}
-			{Array.from(Array(numTargets[1]).keys()).map(i => {
-				const letter =
-					characterSet1[Math.floor(Math.random() * characterSet1.length)]
-				const a = (2 * Math.PI) / numTargets[1]
-				const x = radiusOuterCeiling * Math.cos(i * a)
-				const y = radiusOuterCeiling * Math.sin(i * a)
-				const rotationCeiling =
-					i * ((2 * Math.PI) / numTargets[1]) + Math.PI / 2
-
-				if (outerPositionsCeiling.includes(i)) {
-					return (
-						<Text
-							key={`target-${i}`}
-							position={[x, y, 0.0001]}
-							fontSize={0.15}
-							color='#000000'
-							anchorX='center'
-							anchorY='middle'
-							rotation={[0, 0, rotationCeiling]}
-						>
-							{letter}
-						</Text>
-					)
-				}
-			})}
-		</Plane>
-	)
-}
-
-const ASphere = animated(Sphere)
-
-function Overlay() {
-	const [position, setPosition] = useState([0, 0, 0])
-	const [rotation, setRotation] = useState([0, 0, 0])
-	const { rotation: interpRotation } = useSpring({
-		to: { rotation },
-		config: { duration: 50 }
-	})
-
-	const { camera } = useThree()
-
-	const texture = useTexture('hole4.png')
-	texture.repeat.set(10, 5)
-	texture.offset.set(-7, -2)
-
-	useFrame(() => {
-		setPosition([camera.position.x, camera.position.y, camera.position.z])
-		setRotation([camera.rotation.x, camera.rotation.y, camera.rotation.z])
-	})
-
-	return (
-		<ASphere position={position} rotation={interpRotation}>
-			<meshBasicMaterial
-				transparent
-				attach='material'
-				color='black'
-				alphaMap={texture}
-				side={THREE.BackSide}
-			/>
-		</ASphere>
-	)
-}
+import { Floor } from '../components/vr/Floor'
+import { Ceiling } from '../components/vr/Ceiling'
+import { Wall } from '../components/vr/Wall'
+import { Overlay } from '../components/vr/Overlay'
+import { EXPERIMENT_ROUNDS } from '../constants'
+import { useThree } from '@react-three/fiber'
 
 const VR = React.memo(function VR({ logFile }) {
+	const { gl } = useThree()
+
+	const [round, setRound] = useState({
+		...EXPERIMENT_ROUNDS[0],
+		n: 0,
+		paused: false
+	})
+
+	useXREvent('squeeze', () => {
+		if (round.paused) {
+			const n = round.n + 1
+
+			// Exit the session after the last round.
+			if (n >= EXPERIMENT_ROUNDS.length) {
+				gl.xr.getSession().end()
+				return
+			}
+
+			setRound({
+				n,
+				paused: false,
+				...EXPERIMENT_ROUNDS[n],
+			})
+		} else {
+			setRound({
+				...round,
+				displayLetters: false,
+				paused: true,
+			})
+		}
+	})
+
 	return (
-		<VRCanvas>
+		<>
 			<DefaultXRControllers />
-			<PositionLogger logFile={logFile} />
+			<PositionLogger logFile={logFile} round={round}/>
 
 			<pointLight position={[1, 3, 0]} intensity={0.8}/>
 			<pointLight position={[-1, 3, 0]} intensity={0.8}/>
 
-			{ hasOverlay && <Overlay /> }
+			{ round.overlay && <Overlay /> }
 
 			{/* Top wall */}
 			<Ceiling
 				position={[0, 4, 0]}
 				rotation={[Math.PI / 2, 0, 0]}
 				color='#ececec'
+				round={round}
 			/>
 			{/* Bottom wall */}
 			<Floor
 				position={[0, 0, 0]}
 				rotation={[-Math.PI / 2, 0, 0]}
 				color='#ececec'
+				round={round}
 			/>
 			{/* Back wall */}
 			<Wall
@@ -278,6 +72,7 @@ const VR = React.memo(function VR({ logFile }) {
 				rotation={[0, 0, 0]}
 				color='#ececec'
 				side='back'
+				round={round}
 			/>
 			{/* Right wall */}
 			<Wall
@@ -285,6 +80,7 @@ const VR = React.memo(function VR({ logFile }) {
 				rotation={[0, -Math.PI / 2, 0]}
 				color='#ececec'
 				side='right'
+				round={round}
 			/>
 			{/* Left wall */}
 			<Wall
@@ -292,10 +88,16 @@ const VR = React.memo(function VR({ logFile }) {
 				rotation={[0, Math.PI / 2, 0]}
 				color='#ececec'
 				side='left'
+				round={round}
 			/>
 			{/* Front wall */}
-			<Wall position={[0, 2, 2]} rotation={[0, Math.PI, 0]} color='#ececec' />
-		</VRCanvas>
+			<Wall
+				position={[0, 2, 2]}
+				rotation={[0, Math.PI, 0]}
+				color='#ececec'
+				side='front'
+				round={round} />
+		</>
 	)
 })
 
@@ -333,7 +135,9 @@ function Experiment() {
 					Set log location
 				</button>
 			</div>
-			<VR logFile={logFile} />
+			<VRCanvas>
+				<VR logFile={logFile} />
+			</VRCanvas>
 		</>
 	)
 }

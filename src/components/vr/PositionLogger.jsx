@@ -1,18 +1,14 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useState } from 'react'
 
-export function PositionLogger({ logFile }) {
-	const [headLog, setHeadLog] = useState({
-		position: [],
-		rotation: []
-	})
-
+export function PositionLogger({ logFile, round }) {
+	const [headLog, setHeadLog] = useState([])
 	const { gl, camera } = useThree()
 
 	// When leaving presenting mode, and if a log file exists,
 	// write the log to the file
 	useEffect(() => {
-		if (logFile && !gl.xr.isPresenting && headLog.position.length > 0) {
+		if (logFile && !gl.xr.isPresenting && headLog.length > 0) {
 			const writeLog = async () => {
 				try {
 					const stream = await logFile.createWritable()
@@ -38,17 +34,16 @@ export function PositionLogger({ logFile }) {
 
 	// Log the head position/rotation on every frame
 	useFrame(() => {
-		if (!gl.xr.isPresenting) return
+		if (!gl.xr.isPresenting || round.paused || round.n === 0) return
 
 		// Append the current head position/rotation to the log
-		const newHead = {
-			position: [camera.position.x, camera.position.y, camera.position.z],
-			rotation: [camera.rotation.x, camera.rotation.y, camera.rotation.z]
-		}
-		setHeadLog(prevLog => ({
-			position: [...prevLog.position, newHead.position],
-			rotation: [...prevLog.rotation, newHead.rotation]
-		}))
+		const newHead = [
+			round.n,
+			[camera.position.x, camera.position.y, camera.position.z],
+			[camera.rotation.x, camera.rotation.y, camera.rotation.z]
+		]
+
+		setHeadLog(prevLog => [...prevLog, newHead])
 	})
 
 	return null
