@@ -7,6 +7,19 @@ import { DEBUG, LETTER_SIZE, EXPERIMENT_ROUNDS } from '../../constants'
  * Returns the door on the back wall.
  */
 export function Door({ round }) {
+	let pausedText = ''
+
+	switch (round.n) {
+	case 0:
+		pausedText = 'Squeeze to Start'
+		break
+	case EXPERIMENT_ROUNDS.length - 1:
+		pausedText = 'Squeeze to Leave'
+		break
+	default:
+		pausedText = 'Squeeze for Next Round'
+	}
+
 	return (
 		<Plane
 			args={[LETTER_SIZE * 1.75, 1 / 2]}
@@ -29,7 +42,7 @@ export function Door({ round }) {
 					color='#000000'
 					anchorX='center'
 					anchorY='middle'
-				>{ round.n + 1 === EXPERIMENT_ROUNDS.length ? 'Squeeze to Leave' :  'Squeeze for Next Round'}</Text>
+				>{pausedText}</Text>
 			}
 			{ round.target && !round.paused &&
 				<Text
