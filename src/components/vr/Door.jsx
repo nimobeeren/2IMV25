@@ -1,7 +1,7 @@
 import { Plane, Text } from '@react-three/drei'
 import React from 'react'
 
-import { DEBUG, LETTER_SIZE } from '../../constants'
+import { DEBUG, LETTER_SIZE, EXPERIMENT_ROUNDS } from '../../constants'
 
 /**
  * Returns the door on the back wall.
@@ -29,7 +29,7 @@ export function Door({ round }) {
 					color='#000000'
 					anchorX='center'
 					anchorY='middle'
-				>Squeeze for Next Round</Text>
+				>{ round.n + 1 === EXPERIMENT_ROUNDS.length ? 'Squeeze to Leave' :  'Squeeze for Next Round'}</Text>
 			}
 			{ round.target && !round.paused &&
 				<Text

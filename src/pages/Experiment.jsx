@@ -7,17 +7,26 @@ import { Ceiling } from '../components/vr/Ceiling'
 import { Wall } from '../components/vr/Wall'
 import { Overlay } from '../components/vr/Overlay'
 import { EXPERIMENT_ROUNDS } from '../constants'
+import { useThree } from '@react-three/fiber'
 
 const VR = React.memo(function VR({ logFile }) {
+	const { gl } = useThree()
+
 	const [round, setRound] = useState({
 		...EXPERIMENT_ROUNDS[0],
 		n: 0,
 		paused: false
 	})
 
-	useXREvent('squeeze', (e) => {
+	useXREvent('squeeze', () => {
 		if (round.paused) {
-			const n = (round.n + 1) % EXPERIMENT_ROUNDS.length
+			const n = round.n + 1
+
+			// Exit the session after the last round.
+			if (n >= EXPERIMENT_ROUNDS.length) {
+				gl.xr.getSession().end()
+				return
+			}
 
 			setRound({
 				n,
