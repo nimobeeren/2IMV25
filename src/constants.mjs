@@ -1,4 +1,3 @@
-export const DEBUG = true
 export const NUM_LETTERS = 6
 export const LETTER_SIZE = 1 / NUM_LETTERS
 
