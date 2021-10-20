@@ -10,7 +10,7 @@ export function CircularLetters ({ numTargets, radius, letters, hiddenPositions,
 			const a = (2 * Math.PI) / numTargets
 			const x = radius * Math.cos(i * a)
 			const y = radius * Math.sin(i * a)
-			const rot = i * ((2 * Math.PI) / numTargets) + Math.PI / 2
+			const rot = (id === 'inner-floor' || id === 'outer-floor') ? i * ((2 * Math.PI) / numTargets) - Math.PI / 2 : i * ((2 * Math.PI) / numTargets) + Math.PI / 2
 
 			return (
 				<Text
