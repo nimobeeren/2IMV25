@@ -146,7 +146,7 @@ const rounds = [
 	// 5 round with FOV overlay
 	...generateRounds({
 		n: 5,
-		targetProbability: 0.5,
+		targetProbability: 1,
 		charSet,
 		overlay: true
 	})

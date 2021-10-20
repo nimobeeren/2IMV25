@@ -1,16 +1,16 @@
 Round 0 --> No target present
-Round 1 --> Target Z @ front
+Round 1 --> Target M @ ceiling
 Round 2 --> No target present
-Round 3 --> Target M @ left
-Round 4 --> No target present
-Round 5 --> No target present
+Round 3 --> No target present
+Round 4 --> Target N @ front
+Round 5 --> Target Y @ right
 Round 6 --> No target present
-Round 7 --> Target X @ right
-Round 8 --> Target A @ back
-Round 9 --> Target V @ left
-Round 10 --> No target present
-Round 11 --> No target present
-Round 12 --> Target N @ ceiling
-Round 13 --> Target X @ ceiling
-Round 14 --> No target present
-Round 15 --> Target M @ left
+Round 7 --> No target present
+Round 8 --> No target present
+Round 9 --> Target V @ front
+Round 10 --> Target M @ right
+Round 11 --> Target N @ right
+Round 12 --> Target V @ back
+Round 13 --> Target K @ floor
+Round 14 --> Target X @ right
+Round 15 --> Target Y @ floor
